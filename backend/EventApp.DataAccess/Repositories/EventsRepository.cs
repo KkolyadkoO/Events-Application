@@ -120,8 +120,19 @@ public class EventsRepository : IEventsRepository
         
         string imagePath = "";
         
-        if (imageFile != null && imageFile.Length > 0)
-        {
+        if (imageFile != null && imageFile.Length > 0){
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+
+            var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+            var mimeType = imageFile.ContentType;
+
+            if (!allowedExtensions.Contains(fileExtension) || !allowedMimeTypes.Contains(mimeType))
+            {
+                throw new InvalidOperationException("The uploaded file is not a valid image.");
+            }
+
             var imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
             
             if (!Directory.Exists(imageFolder))
@@ -181,6 +192,17 @@ public class EventsRepository : IEventsRepository
 
     if (imageFile != null)
     {
+        
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+        var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+
+        var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+        var mimeType = imageFile.ContentType;
+
+        if (!allowedExtensions.Contains(fileExtension) || !allowedMimeTypes.Contains(mimeType))
+        {
+            throw new InvalidOperationException("The uploaded file is not a valid image.");
+        }    
         var uploadPath = Path.Combine("wwwroot", "images");
 
         if (!Directory.Exists(uploadPath))
