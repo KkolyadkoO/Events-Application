@@ -1,0 +1,40 @@
+.event-card {
+    background-color: #5e85fb;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 310px;
+    height: 550px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.event-image {
+    border-radius: 10px;
+    width: 300px;
+    height: 400px;
+    object-fit: cover;
+    margin: 0;
+}
+
+.event-title {
+    font-size: 20pt;
+    font-weight: 900;
+    color: #dfdcdc;
+    max-width: 100%;
+    text-align: center;
+    word-wrap: break-word;
+    margin-top: 10px;
+}
+
+.event-date {
+    font-size: 16pt;
+    font-weight: 700;
+    color: #c6c4c4;
+    max-width: 100%;
+    text-align: center;
+    margin-top: auto;
+    margin-bottom: 10px;
+}

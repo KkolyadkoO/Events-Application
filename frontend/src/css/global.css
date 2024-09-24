@@ -1,0 +1,17 @@
+.wrapper {
+    min-height: 100vh;
+    overflow: hidden;
+     display: flex;
+     flex-direction: column;
+}
+
+.content {
+    flex: 1 1 auto;
+}
+
+body{
+    background: url(../../public/background.jpg);
+    background-attachment: fixed;
+    background-size: cover; /* чтобы картинка покрывала весь экран */
+    background-position: center; /* центрирование картинки */
+}

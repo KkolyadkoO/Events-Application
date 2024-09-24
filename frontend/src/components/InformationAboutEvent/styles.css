@@ -1,0 +1,90 @@
+.information-of-event{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #3c609b;
+    width: 40vw;
+    border-radius: 20px;
+    margin: 5vh 0 5vh 0;
+    color: #ededed;
+    padding: 40px 40px 20px 40px;
+}
+
+.title {
+    font-size: 35pt;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.image{
+    width: 95%;
+    border-radius: 10px;
+}
+
+.description {
+    align-self: flex-start;
+    margin: 20px;
+    font-size: 13pt;
+    font-weight: 500;
+}
+
+.info {
+    display: flex;
+    justify-content: space-between;
+    width: 60%;
+    padding: 5px;
+}
+
+.info-text {
+    font-size: 15pt;
+    font-weight: 600;
+}
+
+
+.sing-up {
+    display: flex;
+    gap: 15px;
+    margin: 2%;
+}
+
+.full-button{
+    text-decoration: none;
+    font-size: 24px;
+    padding: 8px 16px;
+    color: rgb(218, 181, 181);
+    font-weight: bold;
+    background-color: #ad4343;
+    box-shadow: 0 -3px #933838 inset;
+    border-radius: 5px;
+    border: none;
+    transition: background-color 0.3s ease;
+    margin-top: 25px;
+}
+
+.sing-up {
+    text-decoration: none;
+    font-size: 24px;
+    padding: 8px 16px;
+    color: #3c609b;
+    font-weight: bold;
+    background-color: #ededed;
+    box-shadow: 0 -3px #b5b5b5 inset;
+    border-radius: 5px;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+
+
+.sing-up:hover {
+    background-color: #b5b5b5;
+
+}
+
+.sing-up:active {
+    background-color: #a3a3a3;
+    box-shadow: 0 3px #a3a3a3 inset;
+
+}
+  
