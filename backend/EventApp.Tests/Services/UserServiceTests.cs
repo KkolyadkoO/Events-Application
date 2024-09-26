@@ -138,4 +138,36 @@ public class UserServiceTests
         var exception = await Assert.ThrowsAsync<DuplicateUsers>(() => _userService.Register(username, email, password, role));
         Assert.Equal("A user with this login already exists", exception.Message);
     }
+    
+    [Fact]
+    public async Task GetUserById_ReturnsUser_WhenUserExists()
+    {
+        var userId = Guid.NewGuid();
+        var user = new User(userId, "testUser", "test@example.com", "password", "user");
+
+        _userRepositoryMock
+            .Setup(repo => repo.GetById(userId))
+            .ReturnsAsync(user);
+
+        var result = await _userService.GetUserById(userId);
+
+        Assert.NotNull(result);
+        Assert.Equal(userId, result.Id);
+        _userRepositoryMock.Verify(repo => repo.GetById(userId), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetUserById_ThrowsUserNotFound_WhenUserDoesNotExist()
+    {
+        var userId = Guid.NewGuid();
+
+        _userRepositoryMock
+            .Setup(repo => repo.GetById(userId))
+            .ThrowsAsync(new Exception("User not found"));
+
+        var exception = await Assert.ThrowsAsync<UserNotFound>(() => _userService.GetUserById(userId));
+        Assert.Equal("User not found", exception.Message);
+        _userRepositoryMock.Verify(repo => repo.GetById(userId), Times.Once);
+    }
+
 }

@@ -36,15 +36,7 @@ public class EventsRepository : IEventsRepository
             .FirstOrDefaultAsync(e => e.Id == id);
         return _mapper.Map<Event>(findedEvent);
     }
-
-    public async Task<Event?> GetByTitle(string title)
-    {
-        var findedEvent = await _dbContex.EventEntities
-            .AsNoTracking()
-            .Include(e => e.Members)
-            .FirstOrDefaultAsync(e => e.Title == title);
-        return _mapper.Map<Event?>(findedEvent);
-    }
+    
 
     public async Task<(List<Event?>, int)> GetByFilters(string? title, Guid? locationId, DateTime? startDate,
         DateTime? endDate, Guid? categoryId, Guid? userId, int? page, int? size)
@@ -96,16 +88,7 @@ public class EventsRepository : IEventsRepository
         return (_mapper.Map<List<Event>>(events), countOfEvents);
     }
 
-    public async Task<List<Event>> GetByPage(int page, int size)
-    {
-        var events = await _dbContex.EventEntities
-            .AsNoTracking()
-            .Include(e => e.Members)
-            .Skip((page - 1) * size)
-            .Take(size)
-            .ToListAsync();
-        return _mapper.Map<List<Event>>(events);
-    }
+   
 
     public async Task<Guid> Create(Event receivedEvent, IFormFile imageFile)
     {

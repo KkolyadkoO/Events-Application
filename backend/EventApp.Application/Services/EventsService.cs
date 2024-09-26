@@ -24,11 +24,7 @@ public class EventsService : IEventsService
     {
         return await _unitOfWork.Events.GetById(id);
     }
-
-    public async Task<Event?> GetEventByTitle(string title)
-    {
-        return await _unitOfWork.Events.GetByTitle(title);
-    }
+    
 
     public async Task<(List<Event?>, int)> GetEventByFilters(string? title, Guid? locationId, DateTime? startDate,
         DateTime? endDate, Guid? category, Guid? userId, int? page, int? size)
@@ -44,11 +40,7 @@ public class EventsService : IEventsService
             size
         );
     }
-
-    public async Task<List<Event>> GetEventByPage(int page, int size)
-    {
-        return await _unitOfWork.Events.GetByPage(page, size);
-    }
+    
 
     public async Task<Guid> AddEvent(Event receivedEvent, IFormFile imageFile)
     {
@@ -82,4 +74,6 @@ public class EventsService : IEventsService
     {
         return await _unitOfWork.Events.Delete(id);
     }
+    
+    
 }
