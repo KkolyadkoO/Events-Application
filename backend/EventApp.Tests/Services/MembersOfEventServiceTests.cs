@@ -186,4 +186,41 @@ public class MembersOfEventServiceTests
 
         Assert.Equal("Test exception", exception.Message);
     }
+    
+    [Fact]
+    public async Task DeleteMemberOfEventByEventIdAndUserId_DeletesMemberSuccessfully()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        // No setup for Delete since we're not returning anything, just checking that it is called.
+        _membersRepositoryMock.Setup(m => m.DeleteByEventIdAndUserId(eventId, userId))
+            .Returns(Task.CompletedTask); // Simulate a successful deletion.
+
+        // Act
+        await _membersOfEventService.DeleteMemberOfEventByEventIdAndUserId(eventId, userId);
+
+        // Assert
+        _membersRepositoryMock.Verify(m => m.DeleteByEventIdAndUserId(eventId, userId), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Complete(), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteMemberOfEventByEventIdAndUserId_ThrowsException_OnFailure()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        _membersRepositoryMock.Setup(m => m.DeleteByEventIdAndUserId(eventId, userId))
+            .ThrowsAsync(new Exception("Test exception")); // Simulate failure.
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<Exception>(() =>
+            _membersOfEventService.DeleteMemberOfEventByEventIdAndUserId(eventId, userId));
+
+        Assert.Equal("UserId or EventId invalid", exception.Message);
+    }
+
 }

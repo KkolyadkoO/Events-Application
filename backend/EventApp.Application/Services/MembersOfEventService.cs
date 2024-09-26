@@ -58,6 +58,7 @@ public class MembersOfEventService : IMembersOfEventService
         try
         {
             await _unitOfWork.Members.DeleteByEventIdAndUserId(eventId, userId);
+            await _unitOfWork.Complete();
         }
         catch (Exception e)
         {
