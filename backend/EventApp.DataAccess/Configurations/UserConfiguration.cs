@@ -1,12 +1,12 @@
-﻿using EventApp.DataAccess.Entities;
+﻿using EventApp.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventApp.DataAccess.Configurations;
 
-public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
+public class UserConfiguration : IEntityTypeConfiguration<User>
 {
-    public void Configure(EntityTypeBuilder<UserEntity> builder)
+    public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.HasKey(a => a.Id);
         builder.HasIndex(u => u.UserEmail)

@@ -1,12 +1,12 @@
 using EventApp.Core.Models;
 
-namespace EventApp.DataAccess.Repositories;
+namespace EventApp.Core.Abstractions.Repositories;
 
 public interface ILocationOfEventsRepository
 {
     Task<List<LocationOfEvent>> Get();
     Task<LocationOfEvent> GetById(Guid id);
-    Task<Guid> Add(Guid id, string title);
-    Task<Guid> Update(Guid id, string title);
-    Task<Guid> Delete(Guid id);
+    Task<Guid> Add(LocationOfEvent locationOfEvent);
+    Task<bool> Update(LocationOfEvent locationOfEvent);
+    Task<bool> Delete(Guid id);
 }

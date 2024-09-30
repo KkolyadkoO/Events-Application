@@ -3,16 +3,17 @@
 public class Event
 {
     public Guid Id { get; }
-    public string Title { get; } = string.Empty;
-    public string Description { get; } = string.Empty;
-    public DateTime Date { get; } = DateTime.Now;
-    public Guid LocationId { get; }  
-    public Guid CategoryId { get; }
-    public int MaxNumberOfMembers { get; } = 0;
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public DateTime Date { get; set; } = DateTime.Now;
+    public Guid LocationId { get; set; }
+    public Guid CategoryId { get; set; }
+    public int MaxNumberOfMembers { get; set; } = 0;
     public List<MemberOfEvent> Members { get; } = [];
-    public string ImageUrl {  get; } = string.Empty;
+    public byte[] Image { get; set; } = [];
 
-    public Event(Guid id, string title, string description, DateTime date, Guid locationId, Guid categoryId, int maxNumberOfMembers, List<MemberOfEvent> members, string imageUrl)
+    public Event(Guid id, string title, string description, DateTime date, Guid locationId,
+        Guid categoryId, int maxNumberOfMembers, List<MemberOfEvent> members, byte[] image)
     {
         Id = id;
         Title = title;
@@ -22,7 +23,7 @@ public class Event
         CategoryId = categoryId;
         MaxNumberOfMembers = maxNumberOfMembers;
         Members = members ?? new List<MemberOfEvent>();
-        ImageUrl = imageUrl;
+        Image = image;
     }
     
 }

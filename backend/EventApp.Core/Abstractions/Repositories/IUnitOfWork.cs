@@ -1,6 +1,4 @@
-using EventApp.DataAccess.Repositories;
-
-namespace EventApp.Core.Abstractions;
+namespace EventApp.Core.Abstractions.Repositories;
 
 public interface IUnitOfWork : IDisposable
 {

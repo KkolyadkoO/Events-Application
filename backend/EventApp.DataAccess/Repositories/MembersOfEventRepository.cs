@@ -1,119 +1,103 @@
-using AutoMapper;
+using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Models;
-using EventApp.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventApp.DataAccess.Repositories;
 
 public class MembersOfEventRepository : IMembersOfEventRepository
 {
-    private readonly EventAppDBContext _dbContex;
-    private readonly IMapper _mapper;
-    
-    public MembersOfEventRepository(EventAppDBContext dbContext, IMapper mapper)
+    private readonly EventAppDBContext _dbContext;
+
+    public MembersOfEventRepository(EventAppDBContext dbContext)
     {
-        _dbContex = dbContext;
-        _mapper = mapper;
+        _dbContext = dbContext;
     }
 
     public async Task<List<MemberOfEvent>> Get()
     {
-        var memberOfEvents = await _dbContex.MemberOfEventEntities
+        var memberOfEvents = await _dbContext.MemberOfEventEntities
             .AsNoTracking()
             .ToListAsync();
-        return _mapper.Map<List<MemberOfEvent>>(memberOfEvents);
+        return memberOfEvents;
     }
 
     public async Task<MemberOfEvent> GetById(Guid id)
     {
-        var memberOfEvent = await _dbContex.MemberOfEventEntities
+        var memberOfEvent = await _dbContext.MemberOfEventEntities
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id);
-        return _mapper.Map<MemberOfEvent>(memberOfEvent);
+        return memberOfEvent;
     }
 
     public async Task<List<MemberOfEvent>> GetByEventId(Guid eventId)
     {
-        var query = _dbContex.MemberOfEventEntities.AsNoTracking();
-        if (eventId != Guid.Empty)
-        {
-            query = query.Where(m => m.EventId == eventId);
-        }
-        var members = await query.ToListAsync();
-        return _mapper.Map<List<MemberOfEvent>>(members);
+        var members = await _dbContext.MemberOfEventEntities.AsNoTracking()
+            .Where(m => m.EventId == eventId)
+            .ToListAsync();
+        return members;
     }
 
     public async Task<List<MemberOfEvent>> GetByUserId(Guid userId)
     {
-        var query = _dbContex.MemberOfEventEntities.AsNoTracking();
-        if (userId != Guid.Empty)
-        {
-            query.Where(m => m.UserId == userId);
-        }
-        var members = await query.ToListAsync();
-        return _mapper.Map<List<MemberOfEvent>>(members);
+        var members = await _dbContext.MemberOfEventEntities.AsNoTracking()
+            .Where(m => m.UserId == userId)
+            .ToListAsync();
+        return members;
     }
 
     public async Task<Guid> Create(MemberOfEvent memberOfEvent)
     {
-        var member = new MemberOfEventEntity
+        await _dbContext.MemberOfEventEntities.AddAsync(memberOfEvent);
+        return memberOfEvent.Id;
+    }
+
+
+    public async Task<bool> Update(MemberOfEvent memberOfEvent)
+    {
+        var foundedMember = await _dbContext.MemberOfEventEntities
+            .Where(m => m.Id == memberOfEvent.Id)
+            .FirstOrDefaultAsync();
+        if (foundedMember == null)
         {
-            UserId = memberOfEvent.UserId,
-            Birthday = memberOfEvent.Birthday,
-            DateOfRegistration = memberOfEvent.DateOfRegistration,
-            Email = memberOfEvent.Email,
-            Id = memberOfEvent.Id,
-            Name = memberOfEvent.Name,
-            LastName = memberOfEvent.LastName,
-            EventId = memberOfEvent.EventId
-        };
-        await _dbContex.MemberOfEventEntities.AddAsync(member);
-        return member.Id;
+            return false;
+        }
+
+        foundedMember.Name = foundedMember.Name;
+        foundedMember.LastName = foundedMember.LastName;
+        foundedMember.Birthday = foundedMember.Birthday;
+        foundedMember.DateOfRegistration = foundedMember.DateOfRegistration;
+        foundedMember.Email = foundedMember.Email;
+        foundedMember.UserId = foundedMember.UserId;
+        foundedMember.EventId = foundedMember.EventId;
+
+        _dbContext.MemberOfEventEntities.Update(foundedMember);
+        
+        return true;
     }
-    public async Task<Guid> Create(Guid id, string name, DateTime birthday,
-        DateTime dateOfRegistration, string email, string lastName, Guid eventId, Guid userId)
+
+    public async Task<bool> Delete(Guid id)
     {
-        var member = new MemberOfEventEntity
+        var foundedMember = await _dbContext.MemberOfEventEntities
+            .FirstOrDefaultAsync(e => e.Id == id);
+
+        if (foundedMember == null)
         {
-            Id = id,
-            Name = name,
-            LastName = lastName,
-            Birthday = birthday,
-            DateOfRegistration = dateOfRegistration,
-            Email = email,
-            EventId = eventId,
-            UserId = userId
-        };
-        await _dbContex.MemberOfEventEntities.AddAsync(member);
-        return member.Id;
-    }
-    public async Task<Guid> Update(Guid id, string name, DateTime birthday, string email, string lastName, Guid eventId, Guid userId)
-    {
+            return false;
+        }
 
-        await _dbContex.MemberOfEventEntities
-            .Where(m => m.Id == id)
-            .ExecuteUpdateAsync(m =>
-                m.SetProperty(m => m.Name, name)
-                    .SetProperty(m => m.LastName, lastName)
-                    .SetProperty(m => m.Birthday, birthday)
-                    .SetProperty(m => m.Email, email)
-                    .SetProperty(m => m.Id, eventId)
-                    .SetProperty(m => m.UserId, userId));
-        return id;
+        return true;
     }
 
-    public async Task<Guid> Delete(Guid id)
+    public async Task<bool> DeleteByEventIdAndUserId(Guid eventId, Guid userId)
     {
-        await _dbContex.MemberOfEventEntities
-            .Where(m => m.Id == id)
-            .ExecuteDeleteAsync();
-        return id;
-    }
+        var foundedMember = await _dbContext.MemberOfEventEntities
+            .FirstOrDefaultAsync(m => m.EventId == eventId && m.UserId == userId);
+        if (foundedMember == null)
+        {
+            return false;
+        }
 
-    public async Task DeleteByEventIdAndUserId(Guid eventId, Guid userId)
-    {
-        await _dbContex.MemberOfEventEntities
-            .Where(m => m.EventId == eventId && m.UserId == userId)
-            .ExecuteDeleteAsync();
+        _dbContext.MemberOfEventEntities.Remove(foundedMember);
+        return true;
     }
 }

@@ -1,12 +1,12 @@
 using EventApp.Core.Models;
 
-namespace EventApp.DataAccess.Repositories;
+namespace EventApp.Core.Abstractions.Repositories;
 
 public interface IRefreshTokenRepository
 {
-    Task<Guid> Create(Guid userId, string token, DateTime expires);
+    Task<Guid> Create(RefreshToken refreshToken);
     Task<RefreshToken> Get(string refreshToken);
     Task<RefreshToken> GetByUserId(Guid userId);
-    Task<string> Update(Guid tokenId, Guid userId, string token, DateTime expires);
-    Task<string> Delete(string refreshToken);
+    Task<bool> Update(RefreshToken refreshToken);
+    Task<bool> Delete(string refreshToken);
 }

@@ -1,13 +1,13 @@
 using EventApp.Core.Models;
 
-namespace EventApp.DataAccess.Repositories;
+namespace EventApp.Core.Abstractions.Repositories;
 
 public interface ICategoryOfEventsRepository
 {
     Task<List<CategoryOfEvent>> Get();
     Task<CategoryOfEvent> GetById(Guid id);
     Task<CategoryOfEvent> GetByTitle(string title);
-    Task<Guid> Add(Guid id, string title);
-    Task<Guid> Update(Guid id, string title);
-    Task<Guid> Delete(Guid id);
+    Task<Guid> Add(CategoryOfEvent categoryOfEvent);
+    Task<bool> Update(CategoryOfEvent categoryOfEvent);
+    Task<bool> Delete(Guid id);
 }

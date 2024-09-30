@@ -1,19 +1,19 @@
-﻿using EventApp.DataAccess.Configurations;
-using EventApp.DataAccess.Entities;
+﻿using EventApp.Core.Models;
+using EventApp.DataAccess.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventApp.DataAccess;
 
 public class EventAppDBContext(DbContextOptions<EventAppDBContext> options) : DbContext(options)
 {
-    public DbSet<EventEntity> EventEntities { get; set; }
-    public DbSet<MemberOfEventEntity> MemberOfEventEntities { get; set; }
-    public DbSet<CategoryOfEventEntity> CategoryOfEventEntities { get; set; }
-    public DbSet<UserEntity> UserEntities { get; set; }
+    public DbSet<Event> EventEntities { get; set; }
+    public DbSet<MemberOfEvent> MemberOfEventEntities { get; set; }
+    public DbSet<CategoryOfEvent> CategoryOfEventEntities { get; set; }
+    public DbSet<User> UserEntities { get; set; }
     
-    public DbSet<RefreshTokenEntity> RefreshTokenEntities { get; set; }
+    public DbSet<RefreshToken> RefreshTokenEntities { get; set; }
     
-    public DbSet<LocationOfEventEntity> LocationsOfEventEntities { get; set; }
+    public DbSet<LocationOfEvent> LocationsOfEventEntities { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

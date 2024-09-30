@@ -1,6 +1,6 @@
 using EventApp.Core.Models;
 
-namespace EventApp.DataAccess.Repositories;
+namespace EventApp.Core.Abstractions.Repositories;
 
 public interface IUserRepository
 {

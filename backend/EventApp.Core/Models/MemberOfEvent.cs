@@ -17,12 +17,11 @@ public class MemberOfEvent
     
 
     public Guid Id { get;  }
-    public string Name { get; } = string.Empty;
-    public string LastName { get;  } = string.Empty;
-    public DateTime Birthday { get; } = DateTime.Today;
-    public DateTime DateOfRegistration { get; } = DateTime.Now;
-    public string Email { get; } = string.Empty;
-    public Guid UserId { get; }
-    public Guid EventId { get; } 
-
+    public string Name { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public DateTime Birthday { get; set; } = DateTime.Today;
+    public DateTime DateOfRegistration { get; set; } = DateTime.Now;
+    public string Email { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
+    public Guid EventId { get; set; }
 }

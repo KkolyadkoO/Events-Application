@@ -1,13 +1,12 @@
 ﻿using EventApp.Core.Models;
-using EventApp.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventApp.DataAccess.Configurations;
 
-public class EventConfiguration : IEntityTypeConfiguration<EventEntity>
+public class EventConfiguration : IEntityTypeConfiguration<Event>
 {
-    public void Configure(EntityTypeBuilder<EventEntity> builder)
+    public void Configure(EntityTypeBuilder<Event> builder)
     {
         builder.HasKey(a => a.Id);
 
@@ -17,12 +16,12 @@ public class EventConfiguration : IEntityTypeConfiguration<EventEntity>
             .HasForeignKey(m => m.EventId)
             .OnDelete(DeleteBehavior.Cascade); 
         builder
-            .HasOne<CategoryOfEventEntity>()
+            .HasOne<CategoryOfEvent>()
             .WithMany()
             .HasForeignKey(e => e.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
         builder
-            .HasOne<LocationOfEventEntity>()
+            .HasOne<LocationOfEvent>()
             .WithMany()
             .HasForeignKey(e => e.LocationId)
             .OnDelete(DeleteBehavior.Restrict);

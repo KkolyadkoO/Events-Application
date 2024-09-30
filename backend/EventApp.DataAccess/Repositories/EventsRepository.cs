@@ -1,80 +1,55 @@
 using AutoMapper;
-using EventApp.Core.Exceptions;
+using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Models;
-using EventApp.DataAccess.Entities;
-using Microsoft.AspNetCore.Http;
+using EventApp.Core.Specifications;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventApp.DataAccess.Repositories;
 
 public class EventsRepository : IEventsRepository
 {
-    private readonly EventAppDBContext _dbContex;
-    private readonly IMapper _mapper;
+    private readonly EventAppDBContext _dbContext;
 
-    public EventsRepository(EventAppDBContext dbContext, IMapper mapper)
+    public EventsRepository(EventAppDBContext dbContext)
     {
-        _dbContex = dbContext;
-        _mapper = mapper;
+        _dbContext = dbContext;
     }
 
     public async Task<List<Event>> Get()
     {
-        var eventEntities = await _dbContex.EventEntities
+        var eventEntities = await _dbContext.EventEntities
             .AsNoTracking()
             .Include(e => e.Members)
             .OrderBy(e => e.Date)
             .ToListAsync();
-        return _mapper.Map<List<Event>>(eventEntities);
+        return eventEntities;
     }
 
-    public async Task<Event?> GetById(Guid id)
+    public async Task<Event> GetById(Guid id)
     {
-        var findedEvent = await _dbContex.EventEntities
+        var foundedEvent = await _dbContext.EventEntities
             .AsNoTracking()
             .Include(e => e.Members)
             .FirstOrDefaultAsync(e => e.Id == id);
-        return _mapper.Map<Event>(findedEvent);
+        return foundedEvent;
     }
-    
 
-    public async Task<(List<Event?>, int)> GetByFilters(string? title, Guid? locationId, DateTime? startDate,
-        DateTime? endDate, Guid? categoryId, Guid? userId, int? page, int? size)
+
+    public async Task<(List<Event>, int)> GetBySpecificationAsync(ISpecification<Event> spec, int? page, int? size)
     {
-        var query = _dbContex.EventEntities.AsNoTracking();
+        var query = _dbContext.EventEntities.AsQueryable();
 
-        if (userId.HasValue && userId != Guid.Empty)
+        if (spec.Criteria != null)
         {
-            query = query.Where(e => e.Members.Any(m => m.UserId == userId));
+            query = query.Where(spec.Criteria);
         }
 
-        if (!string.IsNullOrWhiteSpace(title))
+        if (spec.OrderBy != null)
         {
-            query = query.Where(e => e.Title.ToLower().Contains(title.ToLower()));
+            query = spec.OrderBy(query);
         }
 
-        if (locationId.HasValue && locationId != Guid.Empty)
-        {
-            query = query.Where(e => e.LocationId == locationId.Value);
-        }
-
-        if (categoryId.HasValue && categoryId != Guid.Empty)
-        {
-            query = query.Where(e => e.CategoryId == categoryId.Value);
-        }
-
-        if (startDate.HasValue)
-        {
-            query = query.Where(e => e.Date >= startDate.Value);
-        }
-
-        if (endDate.HasValue)
-        {
-            query = query.Where(e => e.Date <= endDate.Value);
-        }
-
-        query = query.OrderBy(e => e.Date);
-        var countOfEvents = query.Count();
+        var countOfEvents = await query.CountAsync();
 
         if (page.HasValue && size.HasValue)
         {
@@ -82,157 +57,53 @@ public class EventsRepository : IEventsRepository
         }
 
         var events = await query
-            .AsNoTracking()
             .Include(e => e.Members)
+            .AsNoTracking()
             .ToListAsync();
-        return (_mapper.Map<List<Event>>(events), countOfEvents);
+
+        return (events, countOfEvents);
     }
 
-   
 
-    public async Task<Guid> Create(Event receivedEvent, IFormFile imageFile)
+    public async Task<Guid> Create(Event receivedEvent)
     {
-        var foundedCategory = _dbContex.CategoryOfEventEntities
-                                  .AsNoTracking()
-                                  .FirstOrDefault(e => e.Id == receivedEvent.CategoryId)
-                              ?? throw new InvalidOperationException("Category with the same Id does not exists.");
-        var foundedLocation = _dbContex.LocationsOfEventEntities
-                                  .AsNoTracking()
-                                  .FirstOrDefault(e => e.Id == receivedEvent.LocationId)
-                              ?? throw new InvalidOperationException("Location with the same Id does not exists.");
-        
-        string imagePath = "";
-        
-        if (imageFile != null && imageFile.Length > 0){
-
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-            var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
-
-            var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
-            var mimeType = imageFile.ContentType;
-
-            if (!allowedExtensions.Contains(fileExtension) || !allowedMimeTypes.Contains(mimeType))
-            {
-                throw new InvalidOperationException("The uploaded file is not a valid image.");
-            }
-
-            var imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-            
-            if (!Directory.Exists(imageFolder))
-            {
-                Directory.CreateDirectory(imageFolder);
-            }
-            
-            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            
-            var filePath = Path.Combine(imageFolder, uniqueFileName);
-            
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-            
-            imagePath = $"/images/{uniqueFileName}";
-        }
-        
-        var newEvent = new EventEntity
-        {
-            Id = receivedEvent.Id,
-            Title = receivedEvent.Title,
-            LocationId = foundedLocation.Id,
-            Date = receivedEvent.Date,
-            CategoryId = foundedCategory.Id,
-            Description = receivedEvent.Description,
-            MaxNumberOfMembers = receivedEvent.MaxNumberOfMembers,
-            ImageUrl = imagePath,
-        };
-        await _dbContex.EventEntities.AddAsync(newEvent);
-
-        return newEvent.Id;
+        await _dbContext.EventEntities.AddAsync(receivedEvent);
+        return receivedEvent.Id;
     }
 
-    public async Task<Guid> Update(Guid id, string title, Guid location, DateTime date, Guid category,
-        string description, int maxNumberOfMembers, IFormFile? imageFile)
+    public async Task<bool> Update(Event receivedEvent)
     {
-        var foundedCategory = _dbContex.CategoryOfEventEntities
-                                  .AsNoTracking()
-                                  .FirstOrDefault(e => e.Id == category)
-                              ?? throw new InvalidOperationException("Category with the same Id does not exists.");
-        var foundedLocation = _dbContex.LocationsOfEventEntities
-                                  .AsNoTracking()
-                                  .FirstOrDefault(e => e.Id == location)
-                              ?? throw new InvalidOperationException("Location with the same Id does not exists.");
-        var existingEvent = await _dbContex.EventEntities
-        .AsNoTracking()
-        .FirstOrDefaultAsync(e => e.Id == id);
+        var foundedEvent = await _dbContext.EventEntities
+            .FirstOrDefaultAsync(e => e.Id == receivedEvent.Id);
 
-    if (existingEvent == null)
-    {
-        throw new InvalidOperationException("Event with the specified Id does not exist.");
-    }
+        if (foundedEvent == null)
+        {
+            return false;
+        }
 
-    string imageUrl = existingEvent.ImageUrl;
+        foundedEvent.Title = receivedEvent.Title;
+        foundedEvent.Description = receivedEvent.Description;
+        foundedEvent.Date = receivedEvent.Date;
+        foundedEvent.LocationId = receivedEvent.LocationId;
+        foundedEvent.CategoryId = receivedEvent.CategoryId;
+        foundedEvent.MaxNumberOfMembers = receivedEvent.MaxNumberOfMembers;
+        foundedEvent.Image = receivedEvent.Image;
 
-    if (imageFile != null)
-    {
+        _dbContext.EventEntities.Update(receivedEvent);
         
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-        var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
-
-        var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
-        var mimeType = imageFile.ContentType;
-
-        if (!allowedExtensions.Contains(fileExtension) || !allowedMimeTypes.Contains(mimeType))
-        {
-            throw new InvalidOperationException("The uploaded file is not a valid image.");
-        }    
-        var uploadPath = Path.Combine("wwwroot", "images");
-
-        if (!Directory.Exists(uploadPath))
-        {
-            Directory.CreateDirectory(uploadPath);
-        }
-
-        var fileName = Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
-
-        var filePath = Path.Combine(uploadPath, fileName);
-
-        if (!string.IsNullOrEmpty(existingEvent.ImageUrl))
-        {
-            var oldImagePath = Path.Combine("wwwroot", existingEvent.ImageUrl.TrimStart('/'));
-            if (System.IO.File.Exists(oldImagePath))
-            {
-                System.IO.File.Delete(oldImagePath);
-            }
-        }
-
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await imageFile.CopyToAsync(stream);
-        }
-
-        imageUrl = $"/images/{fileName}";
+        return true;
     }
 
-    await _dbContex.EventEntities
-        .Where(e => e.Id == id)
-        .ExecuteUpdateAsync(s =>
-            s.SetProperty(c => c.Title, title)
-                .SetProperty(c => c.LocationId, foundedLocation.Id)
-                .SetProperty(c => c.Date, date)
-                .SetProperty(c => c.CategoryId, foundedCategory.Id)
-                .SetProperty(c => c.Description, description)
-                .SetProperty(c => c.MaxNumberOfMembers, maxNumberOfMembers)
-                .SetProperty(c => c.ImageUrl, imageUrl));
-
-    return id;
-}
-
-    public async Task<Guid> Delete(Guid id)
+    public async Task<bool> Delete(Guid id)
     {
-        await _dbContex.EventEntities
-            .Where(e => e.Id == id)
-            .ExecuteDeleteAsync();
-        return id;
+        var foundedEvent = await _dbContext.EventEntities
+            .FirstOrDefaultAsync(e => e.Id == id);
+
+        if (foundedEvent == null)
+        {
+            return false;
+        }
+        _dbContext.EventEntities.Remove(foundedEvent);
+        return true;
     }
 }

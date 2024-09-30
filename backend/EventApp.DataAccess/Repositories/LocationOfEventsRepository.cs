@@ -1,6 +1,6 @@
 using AutoMapper;
+using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Models;
-using EventApp.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventApp.DataAccess.Repositories;
@@ -8,64 +8,62 @@ namespace EventApp.DataAccess.Repositories;
 public class LocationOfEventsRepository : ILocationOfEventsRepository
 {
     private readonly EventAppDBContext _dbContext;
-    private readonly IMapper _mapper;
-    
-    public LocationOfEventsRepository(EventAppDBContext dbContext, IMapper mapper)
+
+    public LocationOfEventsRepository(EventAppDBContext dbContext)
     {
         _dbContext = dbContext;
-        _mapper = mapper;
     }
 
     public async Task<List<LocationOfEvent>> Get()
     {
-        var locationsOfEventEntities = await _dbContext.LocationsOfEventEntities
+        var locationsOfEvent = await _dbContext.LocationsOfEventEntities
             .AsNoTracking()
             .OrderBy(e => e.Title)
             .ToListAsync();
-        return _mapper.Map<List<LocationOfEvent>>(locationsOfEventEntities);
+        return locationsOfEvent;
     }
-   
+
     public async Task<LocationOfEvent> GetById(Guid id)
     {
-        var foundLocationOfEvent =  await _dbContext.LocationsOfEventEntities
+        var foundLocationOfEvent = await _dbContext.LocationsOfEventEntities
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.Id == id);
-        return _mapper.Map<LocationOfEvent>(foundLocationOfEvent);
+        return foundLocationOfEvent;
     }
 
-    public async Task<Guid> Add(Guid id, string title)
+    public async Task<Guid> Add(LocationOfEvent locationOfEvent)
     {
-        var foundedLocation = _dbContext.LocationsOfEventEntities
-            .AsNoTracking()
-            .FirstOrDefault(e => e.Title == title);
-        if (foundedLocation != null)
-        {
-            throw new InvalidOperationException("Location with the same title already exists. ");
-
-        }
-        var locationOfEvent = new LocationOfEventEntity
-        {
-            Id = id,
-            Title = title,
-        };
-            await _dbContext.LocationsOfEventEntities.AddAsync(locationOfEvent);
-        
+        await _dbContext.LocationsOfEventEntities.AddAsync(locationOfEvent);
         return locationOfEvent.Id;
     }
-    public async Task<Guid> Update(Guid id, string title)
+
+    public async Task<bool> Update(LocationOfEvent locationOfEvent)
     {
-        await _dbContext.LocationsOfEventEntities
-            .Where(e => e.Id == id)
-            .ExecuteUpdateAsync(s =>
-                s.SetProperty(c => c.Title, title));
-        return id;
+        var foundedLocation = await _dbContext.LocationsOfEventEntities
+            .FirstOrDefaultAsync(e => e.Id == locationOfEvent.Id);
+
+        if (foundedLocation == null)
+        {
+            return false;
+        }
+
+        foundedLocation.Title = locationOfEvent.Title;
+        
+        _dbContext.LocationsOfEventEntities.Update(foundedLocation);
+        
+        return true;
     }
 
-    public async Task<Guid> Delete(Guid id)
+    public async Task<bool> Delete(Guid id)
     {
-        await _dbContext.LocationsOfEventEntities
-            .Where(e => e.Id == id)
-            .ExecuteDeleteAsync();
-        return id;
+        var entity = await _dbContext.LocationsOfEventEntities
+            .FirstOrDefaultAsync(e => e.Id == id);
+        if (entity == null)
+        {
+            return false;
+        }
+
+        _dbContext.LocationsOfEventEntities.Remove(entity);
+        return true;
     }
 }

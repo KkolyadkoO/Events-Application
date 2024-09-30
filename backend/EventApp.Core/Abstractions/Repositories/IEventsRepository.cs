@@ -1,20 +1,18 @@
 using EventApp.Core.Models;
-using Microsoft.AspNetCore.Http;
+using EventApp.Core.Specifications;
 
-namespace EventApp.DataAccess.Repositories;
+namespace EventApp.Core.Abstractions.Repositories;
 
 public interface IEventsRepository
 {
     Task<List<Event>> Get();
-    Task<Event?> GetById(Guid id);
+    Task<Event> GetById(Guid id);
 
-    Task<(List<Event?>, int)> GetByFilters(string? title, Guid? locationId, DateTime? startDate,
-        DateTime? endDate, Guid? categoryId, Guid? userId, int? page, int? size);
+    Task<(List<Event>, int)> GetBySpecificationAsync(ISpecification<Event> spec, int? page, int? size);
 
-    Task<Guid> Create(Event receivedEvent, IFormFile imageFile);
+    Task<Guid> Create(Event receivedEvent);
 
-    Task<Guid> Update(Guid id, string title, Guid location, DateTime date, Guid category,
-        string description, int maxNumberOfMembers, IFormFile? imageFile);
+    Task<bool> Update(Event receivedEvent);
 
-    Task<Guid> Delete(Guid id);
+    Task<bool> Delete(Guid id);
 }

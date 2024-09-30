@@ -8,6 +8,6 @@ public class CategoryOfEvent
         Title = title;
     }
 
-    public Guid Id { get; }
-    public string Title { get; }
+    public Guid Id { get; set; }
+    public string Title { get; set; }
 }
