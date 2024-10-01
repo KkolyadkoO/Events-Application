@@ -4,5 +4,5 @@ import {IUser} from "../IUser";
 
 export interface AuthResponse {
     tokensResponse: ITokens;
-    usersResponse: IUser;
+    user: IUser;
 }

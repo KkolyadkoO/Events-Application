@@ -31,7 +31,7 @@ export default class Store {
             const response = await AuthService.login(userName, password);
             localStorage.setItem('accessToken', response.data.tokensResponse.accessToken);
             this.setAuth(true);
-            this.setUser(response.data.usersResponse);
+            this.setUser(response.data.user);
         } catch (e){
             throw e;
         }
@@ -62,7 +62,7 @@ export default class Store {
             console.log(response);
             localStorage.setItem('accessToken', response.data.tokensResponse.accessToken);
             this.setAuth(true);
-            this.setUser(response.data.usersResponse);
+            this.setUser(response.data.user);
         } catch (e) {
             console.error(e);
         } finally {

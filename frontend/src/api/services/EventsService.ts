@@ -4,9 +4,7 @@ import {EventsResponse} from "../../types/response/EventsResponse";
 import {FilteredEventsResponse} from "../../types/response/FilteredEventsResponse";
 
 export class EventsService {
-    static async getAllEvents(): Promise<AxiosResponse<EventsResponse[]>> {
-        return $api.get<EventsResponse[]>('/Events');
-    }
+
 
     static async getEventById(id: string | undefined): Promise<AxiosResponse<EventsResponse>> {
         return $api.get<EventsResponse>(`Events/${id}`);

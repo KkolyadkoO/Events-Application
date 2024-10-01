@@ -22,11 +22,6 @@ export class MembersService {
     }
 
     static async deleteByEventIdAndUserId(eventId: string, userId: string) {
-        return $api.delete('/MembersOfEvent', {
-            params: {
-                eventId: eventId,
-                userId: userId
-            }
-        });
+        return $api.delete(`/MembersOfEvent/event/${eventId}/user/${userId}`);
     }
 }
