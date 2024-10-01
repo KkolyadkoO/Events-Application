@@ -41,15 +41,12 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public async Task Update(RefreshToken refreshToken)
     {
         var foundedRefreshToken = await _dbContext.RefreshTokenEntities
+            .AsNoTracking()
             .FirstOrDefaultAsync(rt => rt.Id == refreshToken.Id);
 
         if (foundedRefreshToken != null)
         {
-            foundedRefreshToken.UserId = refreshToken.UserId;
-            foundedRefreshToken.Token = refreshToken.Token;
-            foundedRefreshToken.Expires = refreshToken.Expires;
-
-            _dbContext.RefreshTokenEntities.Update(foundedRefreshToken);
+            _dbContext.RefreshTokenEntities.Update(refreshToken);
         }
     }
 

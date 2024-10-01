@@ -58,7 +58,7 @@ public class JwtTokenService : IJwtTokenService
         {
             var newRefreshToken = refreshToken;
             newRefreshToken.Token = GenerateRefreshToken();
-            newRefreshToken.Expires = DateTime.Now.AddDays(double.Parse(jwtSettings["RefreshTokenExpiresDay"]));
+            newRefreshToken.Expires = DateTime.Now.ToUniversalTime().AddDays(double.Parse(jwtSettings["RefreshTokenExpiresDay"]));
             await _unitOfWork.RefreshTokens.Update(newRefreshToken);
             await _unitOfWork.Complete();
             return (accessToken, newRefreshToken.Token);
