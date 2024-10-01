@@ -1,134 +1,99 @@
 using EventApp.Application;
-using EventApp.Contracts;
-using EventApp.Core.Models;
+using EventApp.Application.DTOs.CategoryOfEvent;
+using EventApp.Application.UseCases.Category;
+using EventApp.Core.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventApp.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
-public class CategoryOfEventsController : ControllerBase
+public class CategoriesController : ControllerBase
 {
-    private readonly ICategoryOfEventsService _categoryOfEventsService;
+    private readonly AddCategoryUseCase _addCategoryUseCase;
+    private readonly DeleteCategoryUseCase _deleteCategoryUseCase;
+    private readonly GetAllCategoriesUseCase _getAllCategoriesUseCase;
+    private readonly GetCategoryByIdUseCase _getCategoryByIdUseCase;
+    private readonly UpdateCategoryUseCase _updateCategoryUseCase;
 
-    public CategoryOfEventsController(ICategoryOfEventsService categoryOfEventsService)
+    public CategoriesController(
+        AddCategoryUseCase addCategoryUseCase,
+        DeleteCategoryUseCase deleteCategoryUseCase,
+        GetAllCategoriesUseCase getAllCategoriesUseCase,
+        GetCategoryByIdUseCase getCategoryByIdUseCase,
+        UpdateCategoryUseCase updateCategoryUseCase)
     {
-        _categoryOfEventsService = categoryOfEventsService;
+        _addCategoryUseCase = addCategoryUseCase;
+        _deleteCategoryUseCase = deleteCategoryUseCase;
+        _getAllCategoriesUseCase = getAllCategoriesUseCase;
+        _getCategoryByIdUseCase = getCategoryByIdUseCase;
+        _updateCategoryUseCase = updateCategoryUseCase;
     }
+
     [HttpGet]
-    public async Task<ActionResult<List<CategoryOfEventsResponse>>> GetCategories()
+    public async Task<IActionResult> GetAllCategories()
     {
-        var events = await _categoryOfEventsService.GetAllCategoryOfEvents();
-        var response = events.Select(e => new CategoryOfEventsResponse(e.Id,e.Title));
-        
-        return Ok(response);
+        var categories = await _getAllCategoriesUseCase.Execute();
+        return Ok(categories);
     }
+
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<CategoryOfEventsResponse>> GetCategoryOfEventsById(Guid id)
+    public async Task<IActionResult> GetCategoryById(Guid id)
     {
-        var categoryOfEvent = await _categoryOfEventsService.GetCategoryOfEventById(id);
-        var response = new CategoryOfEventsResponse(categoryOfEvent.Id, categoryOfEvent.Title);
-        return Ok(response);
-    }
-    [HttpGet("{title}")]
-    public async Task<ActionResult<CategoryOfEventsResponse>> GetCategoryOfEventsByTitle(string title)
-    {
-        var categoryOfEvent = await _categoryOfEventsService.GetCategoryOfEventByTitle(title);
-        var response = new CategoryOfEventsResponse(categoryOfEvent.Id, categoryOfEvent.Title);
-        return Ok(response);
+        try
+        {
+            var category = await _getCategoryByIdUseCase.Execute(id);
+            return Ok(category);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
 
     [HttpPost]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<Guid>> CreateCategory([FromBody] CategoryOfEventsRequest request)
+    public async Task<IActionResult> AddCategory([FromBody] CategoryOfEventsRequestDto requestDto)
     {
-        var categoryOfEvent = new CategoryOfEvent(
-            Guid.NewGuid(),
-            request.Title);
-
         try
         {
-            var result = await _categoryOfEventsService.AddCategoryOfEvent(categoryOfEvent);
-            return Ok(result);
+            var id = await _addCategoryUseCase.Execute(requestDto);
+            return CreatedAtAction(nameof(GetCategoryById), new { id }, id);
         }
-        catch (Exception ex)
+        catch (DuplicateCategory ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return Conflict(new { message = ex.Message });
         }
     }
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<Guid>> UpdateCategory(Guid id, [FromBody] CategoryOfEventsRequest request)
+    public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] CategoryOfEventsRequestDto requestDto)
     {
-        return await _categoryOfEventsService.UpdateCategoryOfEvent(id, request.Title);
-    }
-
-    [HttpDelete("{id:guid}")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<Guid>> DeleteCategory(Guid id)
-    {
-        return await _categoryOfEventsService.DeleteCategoryOfEvent(id);
-    }
-    
-}
-[ApiController]
-[Route("api/[controller]")]
-public class LocationOfEventsController : ControllerBase
-{
-    private readonly ILocationOfEventsService _locationOfEventsService;
-
-    public LocationOfEventsController(ILocationOfEventsService locationOfEventsService)
-    {
-        _locationOfEventsService = locationOfEventsService;
-    }
-    [HttpGet]
-    public async Task<ActionResult<List<LocationOfEventsResponse>>> GetLocations()
-    {
-        var events = await _locationOfEventsService.GetAllLocationOfEvents();
-        var response = events.Select(e => new CategoryOfEventsResponse(e.Id,e.Title));
-        
-        return Ok(response);
-    }
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<LocationOfEventsResponse>> GetLocationOfEventsById(Guid id)
-    {
-        var categoryOfEvent = await _locationOfEventsService.GetLocationOfEventById(id);
-        var response = new LocationOfEventsResponse(categoryOfEvent.Id, categoryOfEvent.Title);
-        return Ok(response);
-    }
-
-    [HttpPost]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<Guid>> CreateLocation([FromBody] LocationOfEventsRequest request)
-    {
-        var locationOfEvent = new LocationOfEvent(
-            Guid.NewGuid(),
-            request.Title);
-
         try
         {
-            var result = await _locationOfEventsService.AddLocationOfEvent(locationOfEvent);
-            return Ok(result);
+            await _updateCategoryUseCase.Execute(id, requestDto);
+            return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (NotFoundException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return NotFound(new { message = ex.Message });
         }
-    }
-
-    [HttpPut("{id:guid}")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<Guid>> UpdateLocation(Guid id, [FromBody] LocationOfEventsRequest request)
-    {
-        return await _locationOfEventsService.UpdateLocationOfEvent(id, request.Title);
     }
 
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<Guid>> DeleteLocation(Guid id)
+    public async Task<IActionResult> DeleteCategory(Guid id)
     {
-        return await _locationOfEventsService.DeleteLocationOfEvent(id);
+        try
+        {
+            await _deleteCategoryUseCase.Execute(id);
+            return NoContent();
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
-    
 }

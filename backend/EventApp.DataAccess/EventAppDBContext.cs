@@ -20,6 +20,7 @@ public class EventAppDBContext(DbContextOptions<EventAppDBContext> options) : Db
     {
         modelBuilder.ApplyConfiguration(new EventConfiguration());
         modelBuilder.ApplyConfiguration(new EventCategoryConfiguration());
+        modelBuilder.ApplyConfiguration(new EventLocationConfiguration());
         modelBuilder.ApplyConfiguration(new MemberOfEventConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());

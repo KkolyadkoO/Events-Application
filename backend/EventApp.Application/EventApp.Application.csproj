@@ -17,4 +17,8 @@
       <ProjectReference Include="..\EventApp.Core\EventApp.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Abstructions\IUseCase\Category\" />
+    </ItemGroup>
+
 </Project>

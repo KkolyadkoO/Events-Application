@@ -12,7 +12,6 @@ public class CategoryOfEventsRepository : ICategoryOfEventsRepository
     public CategoryOfEventsRepository(EventAppDBContext dbContext)
     {
         _dbContext = dbContext;
-
     }
 
     public async Task<List<CategoryOfEvent>> Get()
@@ -55,23 +54,21 @@ public class CategoryOfEventsRepository : ICategoryOfEventsRepository
         {
             return false;
         }
+
         foundedCategory.Title = categoryOfEvent.Title;
-        
+
         _dbContext.CategoryOfEventEntities.Update(foundedCategory);
-        
-        return true;        
+
+        return true;
     }
 
-    public async Task<bool> Delete(Guid id)
+    public async Task Delete(Guid id)
     {
         var entity = await _dbContext.CategoryOfEventEntities
             .FirstOrDefaultAsync(e => e.Id == id);
-        if (entity == null)
+        if (entity != null)
         {
-            return false;
+            _dbContext.CategoryOfEventEntities.Remove(entity);
         }
-
-        _dbContext.CategoryOfEventEntities.Remove(entity);
-        return true;
     }
 }

@@ -9,5 +9,5 @@ public interface ICategoryOfEventsRepository
     Task<CategoryOfEvent> GetByTitle(string title);
     Task<Guid> Add(CategoryOfEvent categoryOfEvent);
     Task<bool> Update(CategoryOfEvent categoryOfEvent);
-    Task<bool> Delete(Guid id);
+    Task Delete(Guid id);
 }

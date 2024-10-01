@@ -7,7 +7,7 @@ public class CategoryOfEvent
         Id = id;
         Title = title;
     }
-
+    public CategoryOfEvent() { }
     public Guid Id { get; set; }
     public string Title { get; set; }
 }

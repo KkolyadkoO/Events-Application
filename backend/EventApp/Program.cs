@@ -1,14 +1,12 @@
 using System.Text;
-using EventApp.Application;
-using EventApp.Core.Abstractions;
+using EventApp.Application.Mapping;
+using EventApp.Application.UseCases.Category;
+using EventApp.Core.Abstractions.Repositories;
 using EventApp.DataAccess;
-using EventApp.DataAccess.MapperProfiler;
-using EventApp.DataAccess.Repositories;
 using EventApp.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -51,19 +49,27 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddAutoMapper(typeof(EntitiesProfile));
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddDbContext<EventAppDBContext>(
     options => { options.UseNpgsql(configuration.GetConnectionString(nameof(EventAppDBContext))); });
 
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEventsService, EventsService>();
-builder.Services.AddScoped<ICategoryOfEventsService, CategoryOfEventsService>();
-builder.Services.AddScoped<ILocationOfEventsService, LocationOfEventsService>();
-builder.Services.AddScoped<IMembersOfEventService, MembersOfEventService>();
-builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+// builder.Services.AddScoped<IUserService, UserService>();
+// builder.Services.AddScoped<IEventsService, EventsService>();
+
+builder.Services.AddScoped<AddCategoryUseCase>();
+builder.Services.AddScoped<DeleteCategoryUseCase>();
+builder.Services.AddScoped<GetAllCategoriesUseCase>();
+builder.Services.AddScoped<GetCategoryByIdUseCase>();
+builder.Services.AddScoped<UpdateCategoryUseCase>();
+
+
+
+// builder.Services.AddScoped<ILocationOfEventsService, LocationOfEventsService>();
+// builder.Services.AddScoped<IMembersOfEventService, MembersOfEventService>();
+// builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
 builder.Services.AddAuthorization(options =>
 {
