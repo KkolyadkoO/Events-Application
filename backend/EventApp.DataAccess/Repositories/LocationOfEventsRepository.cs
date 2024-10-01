@@ -30,6 +30,14 @@ public class LocationOfEventsRepository : ILocationOfEventsRepository
             .FirstOrDefaultAsync(e => e.Id == id);
         return foundLocationOfEvent;
     }
+    
+    public async Task<LocationOfEvent> GetByTitle(string title)
+    {
+        var foundedLocationOfEvent = await _dbContext.LocationsOfEventEntities
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Title == title);
+        return foundedLocationOfEvent;
+    }
 
     public async Task<Guid> Add(LocationOfEvent locationOfEvent)
     {
@@ -54,16 +62,13 @@ public class LocationOfEventsRepository : ILocationOfEventsRepository
         return true;
     }
 
-    public async Task<bool> Delete(Guid id)
+    public async Task Delete(Guid id)
     {
         var entity = await _dbContext.LocationsOfEventEntities
             .FirstOrDefaultAsync(e => e.Id == id);
-        if (entity == null)
+        if (entity != null)
         {
-            return false;
+            _dbContext.LocationsOfEventEntities.Remove(entity);
         }
-
-        _dbContext.LocationsOfEventEntities.Remove(entity);
-        return true;
     }
 }

@@ -1,7 +1,9 @@
 ﻿namespace EventApp.Core.Models;
+
 public class MemberOfEvent
 {
-    public MemberOfEvent(Guid id, string name, string lastName, DateTime birthday, DateTime dateOfRegistration, string email,
+    public MemberOfEvent(Guid id, string name, string lastName, DateTime birthday, DateTime dateOfRegistration,
+        string email,
         Guid userId, Guid eventId)
     {
         Id = id;
@@ -14,9 +16,9 @@ public class MemberOfEvent
         EventId = eventId;
     }
 
-    
+    public MemberOfEvent() { }
 
-    public Guid Id { get;  }
+    public Guid Id { get; }
     public string Name { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public DateTime Birthday { get; set; } = DateTime.Today;

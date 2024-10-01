@@ -45,6 +45,13 @@ public class MembersOfEventRepository : IMembersOfEventRepository
         return members;
     }
 
+    public async Task<MemberOfEvent> GetByEventIdAndUserId(Guid eventId, Guid userId)
+    {
+        var foundedMember = await _dbContext.MemberOfEventEntities
+            .FirstOrDefaultAsync(m => m.EventId == eventId && m.UserId == userId);
+        return foundedMember;
+    }
+
     public async Task<Guid> Create(MemberOfEvent memberOfEvent)
     {
         await _dbContext.MemberOfEventEntities.AddAsync(memberOfEvent);
@@ -62,30 +69,26 @@ public class MembersOfEventRepository : IMembersOfEventRepository
             return false;
         }
 
-        foundedMember.Name = foundedMember.Name;
-        foundedMember.LastName = foundedMember.LastName;
-        foundedMember.Birthday = foundedMember.Birthday;
-        foundedMember.DateOfRegistration = foundedMember.DateOfRegistration;
-        foundedMember.Email = foundedMember.Email;
-        foundedMember.UserId = foundedMember.UserId;
-        foundedMember.EventId = foundedMember.EventId;
+        foundedMember.Name = memberOfEvent.Name;
+        foundedMember.LastName = memberOfEvent.LastName;
+        foundedMember.Birthday = memberOfEvent.Birthday;
+        foundedMember.DateOfRegistration = memberOfEvent.DateOfRegistration;
+        foundedMember.Email = memberOfEvent.Email;
+        foundedMember.UserId = memberOfEvent.UserId;
+        foundedMember.EventId = memberOfEvent.EventId;
 
         _dbContext.MemberOfEventEntities.Update(foundedMember);
-        
+
         return true;
     }
 
-    public async Task<bool> Delete(Guid id)
+    public async Task Delete(Guid id)
     {
         var foundedMember = await _dbContext.MemberOfEventEntities
             .FirstOrDefaultAsync(e => e.Id == id);
 
-        if (foundedMember == null)
-        {
-            return false;
-        }
-
-        return true;
+        if (foundedMember != null)
+            _dbContext.MemberOfEventEntities.Remove(foundedMember);
     }
 
     public async Task<bool> DeleteByEventIdAndUserId(Guid eventId, Guid userId)

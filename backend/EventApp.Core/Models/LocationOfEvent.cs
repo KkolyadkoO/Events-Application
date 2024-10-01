@@ -8,6 +8,7 @@ public class LocationOfEvent
         Title = title;
     }
 
-    public Guid Id { get; }
+    public LocationOfEvent() {}
+    public Guid Id { get; set; }
     public string Title { get; set; }
 }

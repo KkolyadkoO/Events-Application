@@ -10,10 +10,10 @@ public class Event
     public Guid CategoryId { get; set; }
     public int MaxNumberOfMembers { get; set; } = 0;
     public List<MemberOfEvent> Members { get; } = new List<MemberOfEvent>();
-    public byte[] Image { get; set; }
+    public byte[]? Image { get; set; }
 
     public Event(Guid id, string title, string description, DateTime date, Guid locationId,
-        Guid categoryId, int maxNumberOfMembers, byte[] image)
+        Guid categoryId, int maxNumberOfMembers, byte[]? image)
     {
         Id = id;
         Title = title;
@@ -24,6 +24,8 @@ public class Event
         MaxNumberOfMembers = maxNumberOfMembers;
         Image = image;
     }
+    
+    public Event() { }
     
 }
 

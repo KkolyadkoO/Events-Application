@@ -1,6 +1,8 @@
 using System.Text;
 using EventApp.Application.Mapping;
 using EventApp.Application.UseCases.Category;
+using EventApp.Application.UseCases.Location;
+using EventApp.Application.UseCases.Member;
 using EventApp.Core.Abstractions.Repositories;
 using EventApp.DataAccess;
 using EventApp.Infrastructure;
@@ -65,9 +67,22 @@ builder.Services.AddScoped<GetAllCategoriesUseCase>();
 builder.Services.AddScoped<GetCategoryByIdUseCase>();
 builder.Services.AddScoped<UpdateCategoryUseCase>();
 
+builder.Services.AddScoped<AddLocationUseCase>();
+builder.Services.AddScoped<DeleteLocationUseCase>();
+builder.Services.AddScoped<GetAllLocationsUseCase>();
+builder.Services.AddScoped<GetLocationByIdUseCase>();
+builder.Services.AddScoped<UpdateLocationUseCase>();
+
+builder.Services.AddScoped<AddMemberOfEvent>();
+builder.Services.AddScoped<DeleteMemberOfEvent>();
+builder.Services.AddScoped<DeleteMemberOfEventByEventIdAndUserId>();
+builder.Services.AddScoped<GetAllMembersOfEventByEventId>();
+builder.Services.AddScoped<GetAllMembersOfEventByUserId>();
+builder.Services.AddScoped<GetMemberOfEventById>();
+builder.Services.AddScoped<UpdateMemberOfEvent>();
 
 
-// builder.Services.AddScoped<ILocationOfEventsService, LocationOfEventsService>();
+
 // builder.Services.AddScoped<IMembersOfEventService, MembersOfEventService>();
 // builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 

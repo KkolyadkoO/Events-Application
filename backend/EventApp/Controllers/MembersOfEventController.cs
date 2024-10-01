@@ -1,105 +1,128 @@
-using EventApp.Application;
-using EventApp.Contracts;
-using EventApp.Core.Models;
+using EventApp.Application.DTOs.MemberOfEvent;
+using EventApp.Application.UseCases.Member;
+using EventApp.Core.Exceptions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventApp.Controllers;
 [ApiController]
-[Route("api/[controller]")]
-public class MembersOfEventController : ControllerBase
-{
-    private readonly IMembersOfEventService _membersOfEventService;
-
-    public MembersOfEventController(IMembersOfEventService membersOfEventService)
+    [Route("api/[controller]")]
+    public class MembersOfEventController : ControllerBase
     {
-        _membersOfEventService = membersOfEventService;
-    }
+        private readonly GetMemberOfEventById _getMemberOfEventById;
+        private readonly GetAllMembersOfEventByEventId _getAllMembersOfEventByEventId;
+        private readonly GetAllMembersOfEventByUserId _getAllMembersOfEventByUserId;
+        private readonly AddMemberOfEvent _addMemberOfEvent;
+        private readonly UpdateMemberOfEvent _updateMemberOfEvent;
+        private readonly DeleteMemberOfEvent _deleteMemberOfEvent;
+        private readonly DeleteMemberOfEventByEventIdAndUserId _deleteMemberOfEventByEventIdAndUserId;
 
-    [HttpGet("event/{eventId:guid}")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<List<MemberOfEventsResponse>>> GetAllMembersOfEventById(Guid eventId)
-    {
-        var membersOfEvent = await _membersOfEventService.GetAllMembersOfEventByEventId(eventId);
-        var response = membersOfEvent.Select(m => new MemberOfEventsResponse(
-            m.Id, m.Name, m.LastName, m.Birthday.ToLocalTime(), m.Email, m.UserId, m.EventId));
-        if (response == null)
+        public MembersOfEventController(
+            GetMemberOfEventById getMemberOfEventById,
+            GetAllMembersOfEventByEventId getAllMembersOfEventByEventId,
+            GetAllMembersOfEventByUserId getAllMembersOfEventByUserId,
+            AddMemberOfEvent addMemberOfEvent,
+            UpdateMemberOfEvent updateMemberOfEvent,
+            DeleteMemberOfEvent deleteMemberOfEvent,
+            DeleteMemberOfEventByEventIdAndUserId deleteMemberOfEventByEventIdAndUserId)
         {
-            return BadRequest(new { message = "Event not found." });
+            _getMemberOfEventById = getMemberOfEventById;
+            _getAllMembersOfEventByEventId = getAllMembersOfEventByEventId;
+            _getAllMembersOfEventByUserId = getAllMembersOfEventByUserId;
+            _addMemberOfEvent = addMemberOfEvent;
+            _updateMemberOfEvent = updateMemberOfEvent;
+            _deleteMemberOfEvent = deleteMemberOfEvent;
+            _deleteMemberOfEventByEventIdAndUserId = deleteMemberOfEventByEventIdAndUserId;
         }
-        return Ok(response);
-    }
 
-    [HttpGet("user/{userId:guid}")]
-    [Authorize]
-    public async Task<ActionResult<List<MemberOfEventsResponse>>> GetMembersOfEventByUserId(Guid userId)
-    {
-        var membersOfEvent = await _membersOfEventService.GetAllMembersOfUserById(userId);
-        var response = membersOfEvent.Select(m => new MemberOfEventsResponse(
-            m.Id, m.Name, m.LastName, m.Birthday.ToLocalTime(), m.Email, m.UserId, m.EventId));
-        if (response == null)
+        // GET: api/MembersOfEvent/{id}
+        [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetById(Guid id)
         {
-            return BadRequest(new { message = "Event not found." });
+            try
+            {
+                var member = await _getMemberOfEventById.Execute(id);
+                return Ok(member);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
-        return Ok(response);
-    }
-    [HttpGet("{id:guid}")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<MemberOfEventsResponse>> GetMemberOfEventById(Guid id)
-    {
-        var membersOfEvent = await _membersOfEventService.GetMemberOfEventById(id);
-        var response = new MemberOfEventsResponse(
-            membersOfEvent.Id, membersOfEvent.Name, membersOfEvent.LastName,
-            membersOfEvent.Birthday.ToLocalTime(), membersOfEvent.Email, membersOfEvent.UserId, membersOfEvent.EventId);
-        if (response == null)
+
+        // GET: api/MembersOfEvent/event/{eventId}
+        [HttpGet("event/{eventId}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetByEventId(Guid eventId)
         {
-            return BadRequest(new { message = "Event not found." });
+            var members = await _getAllMembersOfEventByEventId.Execute(eventId);
+            return Ok(members);
         }
-        return Ok(response);
-    }
 
-    [HttpPost]
-    [Authorize]
-    public async Task<ActionResult<MemberOfEventsResponse>> AddMember(MemberOfEventsRequest request)
-    {
-        var memberOfEvent = new MemberOfEvent(
-            Guid.NewGuid(), request.Name, request.LastName, request.Birthday.ToUniversalTime(),
-            DateTime.Now.ToUniversalTime(), request.Email, request.UserId,request.EventId);
-        await _membersOfEventService.AddMemberOfEvent(memberOfEvent);
-        return Ok(memberOfEvent.Id);
-    }
-
-    [HttpPut("{id:guid}")]
-    [Authorize]
-    public async Task<ActionResult<Guid>> UpdateMember(Guid id, [FromBody] MemberOfEventsRequest request)
-    {
-        return await _membersOfEventService.UpdateMemberOfEvent(id, request.Name, request.Birthday.ToUniversalTime()
-            , request.Email, request.LastName, request.EventId, request.UserId);
-
-    }
-    [HttpDelete]
-    [Authorize]
-    public async Task<ActionResult> DeleteMemberByEventIdAndUserId([FromQuery]Guid eventId, Guid userId)
-    {
-        try
+        // GET: api/MembersOfEvent/user/{userId}
+        [HttpGet("user/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> GetByUserId(Guid userId)
         {
-            await _membersOfEventService.DeleteMemberOfEventByEventIdAndUserId(eventId, userId);
-            return Ok();
+            var members = await _getAllMembersOfEventByUserId.Execute(userId);
+            return Ok(members);
         }
-        catch (Exception e)
+
+        // POST: api/MembersOfEvent
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Add([FromBody] MemberOfEventsRequestDto request)
         {
-           return BadRequest(e.Message);
+            var newMemberId = await _addMemberOfEvent.Execute(request);
+            return CreatedAtAction(nameof(GetById), new { id = newMemberId }, new { id = newMemberId });
         }
-        
-    }
 
+        // PUT: api/MembersOfEvent/{id}
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task<IActionResult> Update(Guid id, [FromBody] MemberOfEventsRequestDto request)
+        {
+            try
+            {
+                await _updateMemberOfEvent.Execute(id, request);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
 
-    [HttpDelete("{Id:guid}")]
-    [Authorize]
-    public async Task<ActionResult<Guid>> DeleteMember(Guid Id)
-    {
-        return await _membersOfEventService.DeleteMemberOfEvent(Id);
+        // DELETE: api/MembersOfEvent/{id}
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                await _deleteMemberOfEvent.Execute(id);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        // DELETE: api/MembersOfEvent/event/{eventId}/user/{userId}
+        [HttpDelete("event/{eventId}/user/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteByEventIdAndUserId(Guid eventId, Guid userId)
+        {
+            try
+            {
+                await _deleteMemberOfEventByEventIdAndUserId.Execute(eventId, userId);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
     }
-    
-}

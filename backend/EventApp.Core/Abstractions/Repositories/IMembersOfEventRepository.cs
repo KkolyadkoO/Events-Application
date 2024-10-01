@@ -12,6 +12,7 @@ public interface IMembersOfEventRepository
     
     Task<bool> Update(MemberOfEvent memberOfEvent);
 
-    Task<bool> Delete(Guid id);
+    Task Delete(Guid id);
     Task<bool> DeleteByEventIdAndUserId(Guid eventId, Guid userId);
+    Task<MemberOfEvent> GetByEventIdAndUserId(Guid eventId, Guid userId);
 }
