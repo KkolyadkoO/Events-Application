@@ -9,5 +9,5 @@ public record EventsResponseDto(
     Guid CategoryId = default,
     int MaxNumberOfMembers = 0,
     int NumberOfMembers = 0,
-    byte[] Image = null
+    string? ImageUrl = null
 );

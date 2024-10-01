@@ -38,16 +38,6 @@ public class EventsController : ControllerBase
         return Ok(foundEvent);
     }
 
-    // [HttpGet]
-    // public async Task<ActionResult<List<EventsResponseDto>>> GetAllEvents()
-    // {
-    //     var events = await _getAll.GetAllEvents();
-    //     var response = events.Select(e => new EventsResponse(e.Id, e.Title, e.Description, e.Date
-    //         , e.LocationId, e.CategoryId, e.MaxNumberOfMembers, e.Members.Count, e.ImageUrl));
-    //
-    //     return Ok(response);
-    // }
-
     [HttpGet("filter/")]
     public async Task<ActionResult> GetFilterEvents([FromQuery] EventFilterRequestDto filterRequest)
     {
@@ -64,8 +54,15 @@ public class EventsController : ControllerBase
     // [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<Guid>> CreateEvent([FromForm] EventsRequestDto request, IFormFile imageFile)
     {
-        var id = await _createEventUseCase.Execute(request, imageFile);
-        return Ok(id);
+        try
+        {
+            var id = await _createEventUseCase.Execute(request, imageFile);
+            return Ok(id);
+        }
+        catch (ApplicationException e)
+        {
+            return BadRequest(new { message = e.Message });
+        }
     }
 
     [HttpPut("{id:guid}")]
@@ -81,6 +78,10 @@ public class EventsController : ControllerBase
         catch (NotFoundException e)
         {
             return NotFound(new { message = e.Message });
+        }
+        catch (ApplicationException e)
+        {
+            return BadRequest(new { message = e.Message });
         }
     }
 

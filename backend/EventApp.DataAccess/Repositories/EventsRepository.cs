@@ -74,6 +74,7 @@ public class EventsRepository : IEventsRepository
     public async Task Update(Event receivedEvent)
     {
         var foundedEvent = await _dbContext.EventEntities
+            .AsNoTracking()
             .FirstOrDefaultAsync(e => e.Id == receivedEvent.Id);
 
         if (foundedEvent != null)
@@ -84,7 +85,7 @@ public class EventsRepository : IEventsRepository
             foundedEvent.LocationId = receivedEvent.LocationId;
             foundedEvent.CategoryId = receivedEvent.CategoryId;
             foundedEvent.MaxNumberOfMembers = receivedEvent.MaxNumberOfMembers;
-            foundedEvent.Image = receivedEvent.Image;
+            foundedEvent.ImageUrl = receivedEvent.ImageUrl;
 
             _dbContext.EventEntities.Update(receivedEvent);
         }

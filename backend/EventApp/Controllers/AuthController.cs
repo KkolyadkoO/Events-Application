@@ -40,7 +40,7 @@ public class AuthController : ControllerBase
             var tokens = await _jwtTokenService.GenerateToken(user.Id, user.UserName, user.Role);
             HttpContext.Response.Cookies.Append("refresh_token", tokens.Item2);
             var tokensResponse = new TokensResponse(tokens.Item1, tokens.Item2);
-            return Ok(new { user, tokensResponse });
+            return Ok(new { usersResponse = user, tokensResponse });
         }
         catch (Exception e)
         {

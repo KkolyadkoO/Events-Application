@@ -15,7 +15,7 @@ public class UpdateEventUseCase
         _unitOfWork = unitOfWork;
     }
 
-    public async Task Execute(Guid id,EventsRequestDto request, IFormFile? imageFile)
+    public async Task Execute(Guid id, EventsRequestDto request, IFormFile? imageFile)
     {
         var existingEvent = await _unitOfWork.Events.GetById(id);
         if (existingEvent == null)
@@ -32,17 +32,64 @@ public class UpdateEventUseCase
 
         if (imageFile != null)
         {
-            existingEvent.Image = await ConvertImageToBytes(imageFile);
+            try
+            {
+                existingEvent.ImageUrl = await UpdateImageToFileSystem(imageFile, existingEvent.ImageUrl);
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new ApplicationException("Image file could not be updated ", e);
+            }
         }
 
         await _unitOfWork.Events.Update(existingEvent);
         await _unitOfWork.Complete();
     }
 
-    private async Task<byte[]> ConvertImageToBytes(IFormFile imageFile)
+    private async Task<string> UpdateImageToFileSystem(IFormFile imageFile, string oldImageUrl)
     {
-        using var memoryStream = new MemoryStream();
-        await imageFile.CopyToAsync(memoryStream);
-        return memoryStream.ToArray();
+        string imageUrl = oldImageUrl;
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+
+            var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+            var mimeType = imageFile.ContentType;
+
+            if (!allowedExtensions.Contains(fileExtension) || !allowedMimeTypes.Contains(mimeType))
+            {
+                throw new InvalidOperationException("The uploaded file is not a valid image.");
+            }
+
+            var uploadPath = Path.Combine("wwwroot", "images");
+
+            if (!Directory.Exists(uploadPath))
+            {
+                Directory.CreateDirectory(uploadPath);
+            }
+
+            var fileName = Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
+
+            var filePath = Path.Combine(uploadPath, fileName);
+
+            if (!string.IsNullOrEmpty(oldImageUrl))
+            {
+                var oldImagePath = Path.Combine("wwwroot", oldImageUrl.TrimStart('/'));
+                if (System.IO.File.Exists(oldImagePath))
+                {
+                    System.IO.File.Delete(oldImagePath);
+                }
+            }
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return $"/images/{fileName}";
+        }
+
+        return "";
     }
 }
