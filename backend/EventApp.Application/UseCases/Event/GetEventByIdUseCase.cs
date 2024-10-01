@@ -23,7 +23,9 @@ public class GetEventByIdUseCase
         {
             throw new NotFoundException($"Event with id {id} not found");
         }
-        
-        return _mapper.Map<EventsResponseDto>(existingEvent);
+
+        var response = _mapper.Map<EventsResponseDto>(existingEvent);
+        response = response with { NumberOfMembers = existingEvent.Members.Count };
+        return response;
     }
 }
