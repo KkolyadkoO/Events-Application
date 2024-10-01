@@ -1,8 +1,12 @@
 using System.Text;
+using EventApp.Application;
 using EventApp.Application.Mapping;
 using EventApp.Application.UseCases.Category;
+using EventApp.Application.UseCases.Event;
 using EventApp.Application.UseCases.Location;
 using EventApp.Application.UseCases.Member;
+using EventApp.Application.UseCases.RefreshToken;
+using EventApp.Application.UseCases.User;
 using EventApp.Core.Abstractions.Repositories;
 using EventApp.DataAccess;
 using EventApp.Infrastructure;
@@ -58,7 +62,6 @@ builder.Services.AddDbContext<EventAppDBContext>(
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-// builder.Services.AddScoped<IUserService, UserService>();
 // builder.Services.AddScoped<IEventsService, EventsService>();
 
 builder.Services.AddScoped<AddCategoryUseCase>();
@@ -81,10 +84,22 @@ builder.Services.AddScoped<GetAllMembersOfEventByUserId>();
 builder.Services.AddScoped<GetMemberOfEventById>();
 builder.Services.AddScoped<UpdateMemberOfEvent>();
 
+builder.Services.AddScoped<GetAllUsersUseCase>();
+builder.Services.AddScoped<GetUserByIdUseCase>();
+builder.Services.AddScoped<LoginUserUseCase>();
+builder.Services.AddScoped<RegisterUserUseCase>();
+
+builder.Services.AddScoped<DeleteRefreshToken>();
+builder.Services.AddScoped<GetRefreshToken>();
+builder.Services.AddScoped<Refresh>();
 
 
-// builder.Services.AddScoped<IMembersOfEventService, MembersOfEventService>();
-// builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddScoped<CreateEventUseCase>();
+builder.Services.AddScoped<DeleteEventUseCase>();
+builder.Services.AddScoped<GetEventByIdUseCase>();
+builder.Services.AddScoped<GetEventsByFiltersUseCase>();
+builder.Services.AddScoped<UpdateEventUseCase>();
+
 
 builder.Services.AddAuthorization(options =>
 {

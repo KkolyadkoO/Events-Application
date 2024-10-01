@@ -3,6 +3,7 @@ using Xunit;
 using EventApp.Application;
 using EventApp.Core.Models;
 using EventApp.Core.Abstractions;
+using EventApp.Core.Abstractions.Repositories;
 using Microsoft.AspNetCore.Http;
 
 namespace EventApp.Tests.Services;
@@ -59,12 +60,12 @@ public class EventsServiceTests
         var fileMock = new Mock<IFormFile>();
         fileMock.Setup(f => f.Length).Returns(1000);
 
-        _unitOfWorkMock.Setup(u => u.Events.Create(eventItem, It.IsAny<IFormFile>())).ReturnsAsync(eventId);
+        _unitOfWorkMock.Setup(u => u.Events.Create(eventItem)).ReturnsAsync(eventId);
 
         var result = await _eventsService.AddEvent(eventItem, fileMock.Object);
 
         Assert.Equal(eventId, result);
-        _unitOfWorkMock.Verify(u => u.Events.Create(eventItem, fileMock.Object), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Events.Create(eventItem), Times.Once);
         _unitOfWorkMock.Verify(u => u.Complete(), Times.Once);
     }
 
@@ -135,7 +136,7 @@ public class EventsServiceTests
 
         var expectedExceptionMessage = "Repository error";
 
-        _unitOfWorkMock.Setup(u => u.Events.Create(newEvent, fileMock.Object))
+        _unitOfWorkMock.Setup(u => u.Events.Create(newEvent))
             .ThrowsAsync(new Exception(expectedExceptionMessage));
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -143,7 +144,7 @@ public class EventsServiceTests
 
         Assert.Equal(expectedExceptionMessage, exception.Message);
     
-        _unitOfWorkMock.Verify(u => u.Events.Create(newEvent, fileMock.Object), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Events.Create(newEvent), Times.Once);
     
         _unitOfWorkMock.Verify(u => u.Complete(), Times.Never);
     }

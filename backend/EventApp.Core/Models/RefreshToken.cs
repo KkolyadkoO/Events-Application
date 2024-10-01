@@ -10,7 +10,8 @@ public class RefreshToken
         Expires = expires;
     }
     
-
+    public RefreshToken() { }
+    
     public Guid Id { get;  }
     public Guid UserId { get; set; }
     public string Token { get; set; }

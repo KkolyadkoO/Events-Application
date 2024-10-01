@@ -71,39 +71,33 @@ public class EventsRepository : IEventsRepository
         return receivedEvent.Id;
     }
 
-    public async Task<bool> Update(Event receivedEvent)
+    public async Task Update(Event receivedEvent)
     {
         var foundedEvent = await _dbContext.EventEntities
             .FirstOrDefaultAsync(e => e.Id == receivedEvent.Id);
 
-        if (foundedEvent == null)
+        if (foundedEvent != null)
         {
-            return false;
+            foundedEvent.Title = receivedEvent.Title;
+            foundedEvent.Description = receivedEvent.Description;
+            foundedEvent.Date = receivedEvent.Date;
+            foundedEvent.LocationId = receivedEvent.LocationId;
+            foundedEvent.CategoryId = receivedEvent.CategoryId;
+            foundedEvent.MaxNumberOfMembers = receivedEvent.MaxNumberOfMembers;
+            foundedEvent.Image = receivedEvent.Image;
+
+            _dbContext.EventEntities.Update(receivedEvent);
         }
-
-        foundedEvent.Title = receivedEvent.Title;
-        foundedEvent.Description = receivedEvent.Description;
-        foundedEvent.Date = receivedEvent.Date;
-        foundedEvent.LocationId = receivedEvent.LocationId;
-        foundedEvent.CategoryId = receivedEvent.CategoryId;
-        foundedEvent.MaxNumberOfMembers = receivedEvent.MaxNumberOfMembers;
-        foundedEvent.Image = receivedEvent.Image;
-
-        _dbContext.EventEntities.Update(receivedEvent);
-        
-        return true;
     }
 
-    public async Task<bool> Delete(Guid id)
+    public async Task Delete(Guid id)
     {
         var foundedEvent = await _dbContext.EventEntities
             .FirstOrDefaultAsync(e => e.Id == id);
 
-        if (foundedEvent == null)
+        if (foundedEvent != null)
         {
-            return false;
+            _dbContext.EventEntities.Remove(foundedEvent);
         }
-        _dbContext.EventEntities.Remove(foundedEvent);
-        return true;
     }
 }

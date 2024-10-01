@@ -1,6 +1,6 @@
-using EventApp.Application;
-using EventApp.Contracts;
-using EventApp.Core.Models;
+using EventApp.Application.DTOs.Event;
+using EventApp.Application.UseCases.Event;
+using EventApp.Core.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,86 +10,92 @@ namespace EventApp.Controllers;
 [Route("api/[controller]")]
 public class EventsController : ControllerBase
 {
-    private readonly IEventsService _eventsService;
+    private readonly CreateEventUseCase _createEventUseCase;
+    private readonly UpdateEventUseCase _updateEventUseCase;
+    private readonly DeleteEventUseCase _deleteEventUseCase;
+    private readonly GetEventByIdUseCase _getEventByIdUseCase;
+    private readonly GetEventsByFiltersUseCase _getEventsByFiltersUseCase;
 
-    public EventsController(IEventsService eventsService)
+    public EventsController(CreateEventUseCase createEventUseCase,
+        UpdateEventUseCase updateEventUseCase,
+        DeleteEventUseCase deleteEventUseCase,
+        GetEventByIdUseCase getEventByIdUseCase,
+        GetEventsByFiltersUseCase getEventsByFiltersUseCase
+    )
     {
-        _eventsService = eventsService;
+        _createEventUseCase = createEventUseCase;
+        _updateEventUseCase = updateEventUseCase;
+        _deleteEventUseCase = deleteEventUseCase;
+        _getEventByIdUseCase = getEventByIdUseCase;
+        _getEventsByFiltersUseCase = getEventsByFiltersUseCase;
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<EventsResponse>> GetEventById(Guid id)
+    public async Task<ActionResult<EventsResponseDto>> GetEventById(Guid id)
     {
-        var foundEvent = await _eventsService.GetEventById(id);
-        var response = new EventsResponse(foundEvent.Id, foundEvent.Title, foundEvent.Description,
-            foundEvent.Date, foundEvent.LocationId, foundEvent.CategoryId, foundEvent.MaxNumberOfMembers,
-            foundEvent.Members.Count, foundEvent.ImageUrl);
-        return Ok(response);
+        var foundEvent = await _getEventByIdUseCase.Execute(id);
+
+        return Ok(foundEvent);
     }
 
-    [HttpGet]
-    public async Task<ActionResult<List<EventsResponse>>> GetAllEvents()
-    {
-        var events = await _eventsService.GetAllEvents();
-        var response = events.Select(e => new EventsResponse(e.Id, e.Title, e.Description, e.Date
-            , e.LocationId, e.CategoryId, e.MaxNumberOfMembers, e.Members.Count, e.ImageUrl));
-
-        return Ok(response);
-    }
+    // [HttpGet]
+    // public async Task<ActionResult<List<EventsResponseDto>>> GetAllEvents()
+    // {
+    //     var events = await _getAll.GetAllEvents();
+    //     var response = events.Select(e => new EventsResponse(e.Id, e.Title, e.Description, e.Date
+    //         , e.LocationId, e.CategoryId, e.MaxNumberOfMembers, e.Members.Count, e.ImageUrl));
+    //
+    //     return Ok(response);
+    // }
 
     [HttpGet("filter/")]
-    public async Task<ActionResult> GetFilterEvents([FromQuery] EventFilterRequest filterRequest)
+    public async Task<ActionResult> GetFilterEvents([FromQuery] EventFilterRequestDto filterRequest)
     {
-        var (events,countOfEvents) = await _eventsService.GetEventByFilters(filterRequest.Title, filterRequest.LocationId,
-            filterRequest.StartDate, filterRequest.EndDate, filterRequest.Category,
-            filterRequest.UserId, filterRequest.Page, filterRequest.PageSize);
-        var response = events.Select(e => new EventsResponse(e.Id, e.Title, e.Description, e.Date
-            , e.LocationId, e.CategoryId, e.MaxNumberOfMembers, e.Members.Count, e.ImageUrl));
+        var (events, countOfEvents) = await _getEventsByFiltersUseCase.Execute(filterRequest);
 
         return Ok(new
         {
-            Events = response,
+            Events = events,
             TotalEventCount = countOfEvents
         });
     }
 
     [HttpPost]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<Guid>> CreateEvent([FromForm]EventsRequest request, IFormFile imageFile)
+    // [Authorize(Policy = "AdminOnly")]
+    public async Task<ActionResult<Guid>> CreateEvent([FromForm] EventsRequestDto request, IFormFile imageFile)
     {
-        var newEvent = new Event(Guid.NewGuid(), request.Title, request.Description, request.Date.ToUniversalTime(),
-            request.LocationId, request.CategoryId, request.maxNumberOfMembers, new List<MemberOfEvent>(),
-            "");
-        try
-        {
-            await _eventsService.AddEvent(newEvent, imageFile);
-            return Ok(newEvent.Id);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
+        var id = await _createEventUseCase.Execute(request, imageFile);
+        return Ok(id);
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<Guid>> UpdateEvent(Guid id,[FromForm] EventsRequest request, IFormFile? imageFile)
+    // [Authorize(Policy = "AdminOnly")]
+    public async Task<ActionResult<Guid>> UpdateEvent(Guid id, [FromForm] EventsRequestDto request,
+        IFormFile? imageFile)
     {
         try
         {
-            return await _eventsService.UpdateEvent(id, request.Title, request.LocationId, request.Date.ToUniversalTime(),
-                request.CategoryId, request.Description, request.maxNumberOfMembers, imageFile);
+            await _updateEventUseCase.Execute(id, request, imageFile);
+            return NoContent();
         }
-        catch (Exception e)
+        catch (NotFoundException e)
         {
-            return BadRequest(e.Message);
+            return NotFound(new { message = e.Message });
         }
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Policy = "AdminOnly")]
+    // [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<Guid>> DeleteEvent(Guid id)
     {
-        return await _eventsService.DeleteEvent(id);
+        try
+        {
+            await _deleteEventUseCase.Execute(id);
+            return NoContent();
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new { message = e.Message });
+        }
     }
 }

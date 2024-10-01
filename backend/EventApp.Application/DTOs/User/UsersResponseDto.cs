@@ -1,6 +1,6 @@
-namespace EventApp.Contracts;
+namespace EventApp.Application.DTOs.User;
 
-public record UsersResponse(
+public record UsersResponseDto(
     Guid Id,
     string UserName,
     string UserEmail,

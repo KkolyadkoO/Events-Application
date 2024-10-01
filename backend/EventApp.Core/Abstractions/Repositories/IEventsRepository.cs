@@ -12,7 +12,7 @@ public interface IEventsRepository
 
     Task<Guid> Create(Event receivedEvent);
 
-    Task<bool> Update(Event receivedEvent);
+    Task Update(Event receivedEvent);
 
-    Task<bool> Delete(Guid id);
+    Task Delete(Guid id);
 }

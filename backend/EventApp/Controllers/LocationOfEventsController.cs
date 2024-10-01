@@ -1,7 +1,4 @@
-using EventApp.Application;
-using EventApp.Application.DTOs.CategoryOfEvent;
 using EventApp.Application.DTOs.LocationOfEvent;
-using EventApp.Application.UseCases.Category;
 using EventApp.Application.UseCases.Location;
 using EventApp.Core.Exceptions;
 using Microsoft.AspNetCore.Authorization;

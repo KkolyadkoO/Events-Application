@@ -10,10 +10,13 @@ public class User
         Password = password;
         Role = role;
     }
-    public Guid Id { get; }
-    public string UserName { get; } = string.Empty ;
-    public string UserEmail { get; } = string.Empty;
-    public string Password { get; } = string.Empty;
-    public string Role { get; } = "user";
+    
+    public User() { }
+    
+    public Guid Id { get; set; }
+    public string UserName { get; set; } = string.Empty ;
+    public string UserEmail { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public string Role { get; set; } = "user";
     public List<MemberOfEvent> MemberOfEvents { get; } = [];
 }

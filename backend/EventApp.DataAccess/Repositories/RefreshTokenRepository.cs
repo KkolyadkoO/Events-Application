@@ -38,36 +38,28 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         return token;
     }
 
-    public async Task<bool> Update(RefreshToken refreshToken)
+    public async Task Update(RefreshToken refreshToken)
     {
         var foundedRefreshToken = await _dbContext.RefreshTokenEntities
             .FirstOrDefaultAsync(rt => rt.Id == refreshToken.Id);
 
-        if (foundedRefreshToken == null)
+        if (foundedRefreshToken != null)
         {
-            return false;
+            foundedRefreshToken.UserId = refreshToken.UserId;
+            foundedRefreshToken.Token = refreshToken.Token;
+            foundedRefreshToken.Expires = refreshToken.Expires;
+
+            _dbContext.RefreshTokenEntities.Update(foundedRefreshToken);
         }
-
-        foundedRefreshToken.UserId = refreshToken.UserId;
-        foundedRefreshToken.Token = refreshToken.Token;
-        foundedRefreshToken.Expires = refreshToken.Expires;
-
-        _dbContext.RefreshTokenEntities.Update(foundedRefreshToken);
-
-        return true;
     }
 
-    public async Task<bool> Delete(string refreshToken)
+    public async Task Delete(string refreshToken)
     {
         var foundedRefreshToken = await _dbContext.RefreshTokenEntities
             .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
-        if (foundedRefreshToken == null)
+        if (foundedRefreshToken != null)
         {
-            return false;
+            _dbContext.RefreshTokenEntities.Remove(foundedRefreshToken);
         }
-        
-        _dbContext.RefreshTokenEntities.Remove(foundedRefreshToken);
-
-        return true;
     }
 }

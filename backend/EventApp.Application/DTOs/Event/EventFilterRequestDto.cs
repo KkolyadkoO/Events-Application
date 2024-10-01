@@ -1,6 +1,6 @@
-namespace EventApp.Contracts;
+namespace EventApp.Application.DTOs.Event;
 
-public record EventFilterRequest(
+public record EventFilterRequestDto(
     string? Title = null,
     Guid? LocationId = null,
     DateTime? StartDate = null,

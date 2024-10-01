@@ -1,6 +1,6 @@
-namespace EventApp.Controllers;
+namespace EventApp.Application.DTOs.User;
 
-public record UserRegisterRequest(
+public record UserRegisterRequestDto(
     string Username,
     string UserEmail,
     string Password,

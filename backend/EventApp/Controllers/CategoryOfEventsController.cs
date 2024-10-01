@@ -1,4 +1,3 @@
-using EventApp.Application;
 using EventApp.Application.DTOs.CategoryOfEvent;
 using EventApp.Application.UseCases.Category;
 using EventApp.Core.Exceptions;

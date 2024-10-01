@@ -1,6 +1,7 @@
-using EventApp.Application;
-using EventApp.Contracts;
-using EventApp.Core.Abstractions;
+using EventApp.Application.DTOs.User;
+using EventApp.Application.UseCases.RefreshToken;
+using EventApp.Application.UseCases.User;
+using EventApp.Core.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,25 +10,29 @@ namespace EventApp.Controllers;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly IUserService _userService;
-    private readonly IRefreshTokenService _refreshTokenService;
+    private readonly RegisterUserUseCase _registerUserUseCase;
+    private readonly GetAllUsersUseCase _getAllUsersUseCase;
+    private readonly DeleteRefreshToken _deleteRefreshToken;
 
-    public UserController(IUserService userService, IRefreshTokenService refreshTokenService)
+    public UserController(RegisterUserUseCase registerUserUseCase,
+        GetAllUsersUseCase getAllUsersUseCase,
+        DeleteRefreshToken deleteRefreshToken)
     {
-        _userService = userService;
-        _refreshTokenService = refreshTokenService;
+        _registerUserUseCase = registerUserUseCase;
+        _getAllUsersUseCase = getAllUsersUseCase;
+        _deleteRefreshToken = deleteRefreshToken;
     }
     [HttpPost("register")]
-    public async Task<IResult> RegisterUser([FromBody] UserRegisterRequest request)
+    public async Task<IActionResult> RegisterUser([FromBody] UserRegisterRequestDto request)
     {
         try
         {
-            await _userService.Register(request.Username,request.UserEmail, request.Password, request.Role);
-            return Results.Ok();
+            await _registerUserUseCase.Execute(request);
+            return Ok();
         }
-        catch (Exception e)
+        catch (DuplicateUsers e)
         {
-            return Results.BadRequest(e.Message);
+            return BadRequest(new { Message = e.Message });
         }
         
     }
@@ -36,9 +41,7 @@ public class UserController : ControllerBase
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> GetUsers()
     {
-        var users = await _userService.GetAllUsers();
-        var response = users.Select(u => new UsersResponse(u.Id,
-            u.UserName, u.UserEmail, u.Role));
+        var response = await _getAllUsersUseCase.Execute();
         return Ok(response);
     }
 
@@ -48,18 +51,18 @@ public class UserController : ControllerBase
         string? refreshToken = Request.Cookies["refresh_token"];
         if (refreshToken == null)
         {
-            return NotFound("Refresh token not found in cookies");
+            return NotFound(new { message = "Refresh token not found in cookies" });
         }
 
         try
         {
-            await _refreshTokenService.DeleteRefreshToken(refreshToken);
+            await _deleteRefreshToken.Execute(refreshToken);
             Response.Cookies.Delete("refresh_token");
             return Ok();
         }
-        catch (Exception e)
+        catch (NotFoundException e)
         {
-            return NotFound("Refresh token not found in base");
+            return NotFound(new { message = e.Message });
         }
         
     }

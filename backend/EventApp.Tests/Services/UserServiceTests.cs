@@ -1,8 +1,8 @@
 using EventApp.Application;
 using EventApp.Core.Abstractions;
+using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
-using EventApp.DataAccess.Repositories;
 using EventApp.Infrastructure;
 using Moq;
 using Xunit;

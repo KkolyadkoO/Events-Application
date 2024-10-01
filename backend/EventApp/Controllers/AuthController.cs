@@ -1,5 +1,7 @@
-using EventApp.Application;
-using EventApp.Contracts;
+using EventApp.Application.DTOs.User;
+using EventApp.Application.UseCases.RefreshToken;
+using EventApp.Application.UseCases.User;
+using EventApp.Core.Exceptions;
 using EventApp.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,28 +13,34 @@ namespace EventApp.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IJwtTokenService _jwtTokenService;
-    private readonly IUserService _userService;
-    private readonly IRefreshTokenService _refreshTokenService;
+    private readonly LoginUserUseCase _loginUserUseCase;
+    private readonly GetUserByIdUseCase _getUserByIdUseCase;
+    private readonly Refresh _refresh;
+    private readonly GetRefreshToken _getRefreshToken;
 
-    public AuthController(IJwtTokenService jwtTokenService, IUserService userService,
-        IRefreshTokenService refreshTokenService)
+    public AuthController(IJwtTokenService jwtTokenService,
+        LoginUserUseCase loginUserUseCase,
+        GetUserByIdUseCase getUserByIdUseCase,
+        Refresh refresh,
+        GetRefreshToken getRefreshToken)
     {
         _jwtTokenService = jwtTokenService;
-        _userService = userService;
-        _refreshTokenService = refreshTokenService;
+        _loginUserUseCase = loginUserUseCase;
+        _getUserByIdUseCase = getUserByIdUseCase;
+        _refresh = refresh;
+        _getRefreshToken = getRefreshToken;
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] UserLoginRequest model)
+    public async Task<IActionResult> Login([FromBody] UserLoginRequestDto request)
     {
         try
         {
-            var user = await _userService.Login(model.UserName, model.Password);
-            var usersResponse = new UsersResponse(user.Id, user.UserName, user.UserEmail, user.Role);
-            var tokens = await _jwtTokenService.GenerateToken(user.Id, model.UserName, user.Role);
+            var user = await _loginUserUseCase.Execute(request);
+            var tokens = await _jwtTokenService.GenerateToken(user.Id, user.UserName, user.Role);
             HttpContext.Response.Cookies.Append("refresh_token", tokens.Item2);
             var tokensResponse = new TokensResponse(tokens.Item1, tokens.Item2);
-            return Ok(new {usersResponse, tokensResponse});
+            return Ok(new { user, tokensResponse });
         }
         catch (Exception e)
         {
@@ -48,13 +56,24 @@ public class AuthController : ControllerBase
         {
             return Unauthorized("Refresh token is empty");
         }
-        var tokens = await _refreshTokenService.RefreshToken(refreshToken);
-        HttpContext.Response.Cookies.Append("refresh_token", tokens.Item2);
-        var tokensResponse = new TokensResponse(tokens.Item1, tokens.Item2);
-        var rt = await _refreshTokenService.GetRefreshToken(refreshToken);
-        var user = await _userService.GetUserById(rt.UserId);
-        var usersResponse = new UsersResponse(user.Id, user.UserName, user.UserEmail, user.Role);
 
-        return Ok(new {usersResponse, tokensResponse});
+        try
+        {
+            var tokens = await _refresh.Execute(refreshToken);
+            HttpContext.Response.Cookies.Append("refresh_token", tokens.Item2);
+            var tokensResponse = new TokensResponse(tokens.Item1, tokens.Item2);
+            var rt = await _getRefreshToken.Execute(refreshToken);
+            var user = await _getUserByIdUseCase.Execute(rt.UserId);
+
+            return Ok(new { user, tokensResponse });
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new { Message = e.Message });
+        }
+        catch (InvalidRefreshToken e)
+        {
+            return BadRequest(new { Message = e.Message });
+        }
     }
 }
