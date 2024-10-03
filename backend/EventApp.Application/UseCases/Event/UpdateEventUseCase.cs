@@ -10,7 +10,7 @@ public class UpdateEventUseCase
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateEventUseCase(IUnitOfWork unitOfWork, IMapper mapper)
+    public UpdateEventUseCase(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
