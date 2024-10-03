@@ -1,9 +1,11 @@
-using Moq;
-using Xunit;
 using EventApp.Application.UseCases.Category;
 using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
+using Moq;
+using Xunit;
+
+namespace EventApp.Tests.UseCases.Category;
 
 public class DeleteCategoryUseCaseTests
 {

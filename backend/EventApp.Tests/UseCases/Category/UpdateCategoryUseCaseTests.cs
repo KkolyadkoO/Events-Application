@@ -1,11 +1,13 @@
-using Moq;
-using Xunit;
 using AutoMapper;
+using EventApp.Application.DTOs.CategoryOfEvent;
 using EventApp.Application.UseCases.Category;
 using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
-using EventApp.Application.DTOs.CategoryOfEvent;
+using Moq;
+using Xunit;
+
+namespace EventApp.Tests.UseCases.Category;
 
 public class UpdateCategoryUseCaseTests
 {

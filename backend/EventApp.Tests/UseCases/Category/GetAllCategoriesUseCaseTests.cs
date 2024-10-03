@@ -1,12 +1,12 @@
-using Moq;
-using Xunit;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using AutoMapper;
+using EventApp.Application.DTOs.CategoryOfEvent;
 using EventApp.Application.UseCases.Category;
 using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Models;
-using EventApp.Application.DTOs.CategoryOfEvent;
+using Moq;
+using Xunit;
+
+namespace EventApp.Tests.UseCases.Category;
 
 public class GetAllCategoriesUseCaseTests
 {
