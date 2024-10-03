@@ -1,4 +1,3 @@
-using AutoMapper;
 using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Models;
 using Microsoft.EntityFrameworkCore;
