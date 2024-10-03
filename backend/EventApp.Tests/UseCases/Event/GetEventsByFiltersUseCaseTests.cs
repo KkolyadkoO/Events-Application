@@ -55,14 +55,12 @@ public class GetEventsByFiltersUseCaseTests
     [Fact]
     public async Task Execute_ShouldHandleInvalidFilterData()
     {
-        // Arrange
         var request = new EventFilterRequestDto
         {
-            StartDate = DateTime.Now.AddDays(5), // Например, некорректный диапазон дат
+            StartDate = DateTime.Now.AddDays(5), 
             EndDate = DateTime.Now.AddDays(-5)
         };
 
-        // Act & Assert
         await Assert.ThrowsAsync<NullReferenceException>(() => _useCase.Execute(request));
     }
 }

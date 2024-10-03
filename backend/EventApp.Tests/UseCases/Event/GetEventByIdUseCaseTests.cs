@@ -42,7 +42,6 @@ public class GetEventByIdUseCaseTests
         var eventId = Guid.NewGuid();
         _unitOfWorkMock.Setup(u => u.Events.GetById(eventId)).ReturnsAsync((Core.Models.Event)null);
 
-        // Act & Assert
         await Assert.ThrowsAsync<NotFoundException>(() => _useCase.Execute(eventId));
     }
 }

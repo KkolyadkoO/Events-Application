@@ -38,7 +38,7 @@ public class RefreshTests
             Expires = DateTime.UtcNow.AddDays(7)
         };
 
-        var user = new User
+        var user = new Core.Models.User
         {
             Id = userId,
             UserName = userName,
@@ -150,7 +150,7 @@ public class RefreshTests
 
         _unitOfWorkMock
             .Setup(uow => uow.Users.GetById(userId))
-            .ReturnsAsync((User)null);
+            .ReturnsAsync((Core.Models.User)null);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<NotFoundException>(() => _refreshUseCase.Execute(token));
