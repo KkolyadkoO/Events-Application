@@ -1,10 +1,12 @@
-using Xunit;
-using Moq;
 using AutoMapper;
 using EventApp.Application.DTOs.MemberOfEvent;
 using EventApp.Application.UseCases.Member;
 using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Models;
+using Moq;
+using Xunit;
+
+namespace EventApp.Tests.UseCases.Member;
 
 public class GetAllMembersOfEventByUserIdTests
 {
