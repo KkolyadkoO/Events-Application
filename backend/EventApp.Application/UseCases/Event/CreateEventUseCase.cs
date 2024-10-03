@@ -2,9 +2,6 @@ using AutoMapper;
 using EventApp.Application.DTOs.Event;
 using EventApp.Core.Abstractions.Repositories;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace EventApp.Application.UseCases.Event
 {
