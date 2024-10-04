@@ -1,8 +1,10 @@
 using AutoMapper;
 using EventApp.Application.DTOs.MemberOfEvent;
 using EventApp.Application.UseCases.Member;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -36,13 +38,13 @@ public class GetAllMembersOfEventByEventIdTests
             new MemberOfEventsResponseDto(Guid.NewGuid(), "Jane", "Doe", DateTime.Today, "jane@example.com", Guid.NewGuid(), eventId)
         };
 
-        _unitOfWorkMock.Setup(u => u.Members.GetByEventId(eventId)).ReturnsAsync(members);
+        _unitOfWorkMock.Setup(u => u.Members.GetByEventIdAsync(eventId)).ReturnsAsync(members);
         _mapperMock.Setup(m => m.Map<List<MemberOfEventsResponseDto>>(members)).Returns(responseDtos);
 
 
         var result = await _getAllMembersOfEventByEventIdUseCase.Execute(eventId);
 
         Assert.Equal(responseDtos, result);
-        _unitOfWorkMock.Verify(u => u.Members.GetByEventId(eventId), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Members.GetByEventIdAsync(eventId), Times.Once);
     }
 }

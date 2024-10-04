@@ -1,5 +1,5 @@
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.DataAccess.Abstractions;
 using EventApp.Infrastructure;
 
 namespace EventApp.Application.UseCases.RefreshToken;
@@ -17,7 +17,7 @@ public class Refresh
 
     public async Task<(string, string)> Execute(string refreshToken)
     {
-        var storedRefreshToken = await _unitOfWork.RefreshTokens.Get(refreshToken);
+        var storedRefreshToken = await _unitOfWork.RefreshTokens.GetByTokenAsync(refreshToken);
         if (storedRefreshToken == null)
         {
             throw new NotFoundException($"Refresh Token with token {refreshToken} not found");
@@ -28,7 +28,7 @@ public class Refresh
             throw new InvalidRefreshToken("Invalid or expired refresh token");
         }
 
-        var user = await _unitOfWork.Users.GetById(storedRefreshToken.UserId);
+        var user = await _unitOfWork.Users.GetByIdAsync(storedRefreshToken.UserId);
         if (user == null)
         {
             throw new NotFoundException($"User with id {storedRefreshToken.UserId} not found");

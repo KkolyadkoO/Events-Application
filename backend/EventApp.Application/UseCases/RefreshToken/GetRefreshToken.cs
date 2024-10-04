@@ -1,5 +1,5 @@
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.RefreshToken;
 
@@ -14,7 +14,7 @@ public class GetRefreshToken
 
     public async Task<Core.Models.RefreshToken> Execute(string refreshToken)
     {
-        var foundedRefreshToken = await _unitOfWork.RefreshTokens.Get(refreshToken);
+        var foundedRefreshToken = await _unitOfWork.RefreshTokens.GetByTokenAsync(refreshToken);
         if (foundedRefreshToken == null)
         {
             throw new NotFoundException($"Refresh token {refreshToken} not found");

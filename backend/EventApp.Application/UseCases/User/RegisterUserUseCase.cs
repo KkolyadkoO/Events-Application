@@ -1,7 +1,7 @@
 using AutoMapper;
 using EventApp.Application.DTOs.User;
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.DataAccess.Abstractions;
 using EventApp.Infrastructure;
 
 namespace EventApp.Application.UseCases.User;
@@ -21,16 +21,21 @@ public class RegisterUserUseCase
 
     public async Task Execute(UserRegisterRequestDto request)
     {
-        var existingUser = await _unitOfWork.Users.GetByEmail(request.UserEmail);
-        if (existingUser != null)
+        var existingUserEmail = await _unitOfWork.Users.GetByEmailAsync(request.UserEmail);
+        if (existingUserEmail != null)
         {
             throw new DuplicateUsers("A user with this email already exists");
+        }
+        var existingUserLogin = await _unitOfWork.Users.GetByLoginAsync(request.UserName);
+        if (existingUserLogin != null)
+        {
+            throw new DuplicateUsers("A user with this login already exists");
         }
 
         var user = _mapper.Map<Core.Models.User>(request);
         user.Password = _passwordHasher.HashPassword(request.Password);
 
-        await _unitOfWork.Users.Create(user);
+        await _unitOfWork.Users.AddAsync(user);
         await _unitOfWork.Complete();
     }
 }

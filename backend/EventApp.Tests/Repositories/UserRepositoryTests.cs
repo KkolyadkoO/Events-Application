@@ -25,7 +25,7 @@ public class UserRepositoryTests
         {
             var repository = new UserRepository(context);
 
-            var resultId = await repository.Create(user);
+            var resultId = await repository.AddAsync(user);
             await context.SaveChangesAsync();
 
             var addedUser = await context.UserEntities.FindAsync(resultId);
@@ -53,7 +53,7 @@ public class UserRepositoryTests
         {
             var repository = new UserRepository(context);
 
-            var result = await repository.Get();
+            var result = await repository.GetAllAsync();
 
             Assert.Equal(2, result.Count);
             Assert.Equal("User1", result[0].UserName);
@@ -78,7 +78,7 @@ public class UserRepositoryTests
         {
             var repository = new UserRepository(context);
 
-            var result = await repository.GetByEmail(userEmail);
+            var result = await repository.GetByEmailAsync(userEmail);
 
             Assert.NotNull(result);
             Assert.Equal(userId, result.Id);
@@ -95,7 +95,7 @@ public class UserRepositoryTests
         {
             var repository = new UserRepository(context);
 
-            var result = await repository.GetByEmail("non-existent@mail.com");
+            var result = await repository.GetByEmailAsync("non-existent@mail.com");
 
             Assert.Null(result);
         }
@@ -118,7 +118,7 @@ public class UserRepositoryTests
         {
             var repository = new UserRepository(context);
 
-            var result = await repository.GetById(userId);
+            var result = await repository.GetByIdAsync(userId);
 
             Assert.NotNull(result);
             Assert.Equal(userId, result.Id);
@@ -134,7 +134,7 @@ public class UserRepositoryTests
         {
             var repository = new UserRepository(context);
 
-            var result = await repository.GetById(Guid.NewGuid());
+            var result = await repository.GetByIdAsync(Guid.NewGuid());
 
             Assert.Null(result);
         }
@@ -158,7 +158,7 @@ public class UserRepositoryTests
         {
             var repository = new UserRepository(context);
 
-            var result = await repository.GetByLogin(userLogin);
+            var result = await repository.GetByLoginAsync(userLogin);
 
             Assert.NotNull(result);
             Assert.Equal(userId, result.Id);
@@ -175,7 +175,7 @@ public class UserRepositoryTests
         {
             var repository = new UserRepository(context);
 
-            var result = await repository.GetByLogin("non-existent");
+            var result = await repository.GetByLoginAsync("non-existent");
 
             Assert.Null(result);
         }

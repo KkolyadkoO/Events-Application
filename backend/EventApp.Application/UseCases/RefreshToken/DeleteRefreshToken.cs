@@ -1,5 +1,5 @@
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.RefreshToken;
 
@@ -14,13 +14,13 @@ public class DeleteRefreshToken
     
     public async Task Execute(string refreshToken)
     {
-        var FoundedRefreshToken = await _unitOfWork.RefreshTokens.Get(refreshToken);
+        var FoundedRefreshToken = await _unitOfWork.RefreshTokens.GetByTokenAsync(refreshToken);
         if (FoundedRefreshToken == null)
         {
             throw new NotFoundException($"Refresh Token with token {refreshToken} not found");
         }
 
-        await _unitOfWork.RefreshTokens.Delete(refreshToken);
+        await _unitOfWork.RefreshTokens.DeleteByTokenAsync(refreshToken);
         await _unitOfWork.Complete();
     }
 }

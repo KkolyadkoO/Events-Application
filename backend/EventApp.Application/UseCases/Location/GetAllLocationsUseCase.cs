@@ -1,6 +1,6 @@
 using AutoMapper;
 using EventApp.Application.DTOs.LocationOfEvent;
-using EventApp.Core.Abstractions.Repositories;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Location;
 
@@ -17,7 +17,7 @@ public class GetAllLocationsUseCase
 
     public async Task<List<LocationOfEventsResponseDto>> Execute()
     {
-        var categories = await _unitOfWork.Locations.Get();
+        var categories = await _unitOfWork.Locations.GetAllAsync();
             
         return _mapper.Map<List<LocationOfEventsResponseDto>>(categories);
     }

@@ -1,6 +1,6 @@
 using AutoMapper;
 using EventApp.Application.DTOs.MemberOfEvent;
-using EventApp.Core.Abstractions.Repositories;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Member;
 
@@ -17,7 +17,7 @@ public class GetAllMembersOfEventByEventId
 
     public async Task<List<MemberOfEventsResponseDto>> Execute(Guid eventId)
     {
-        var members = await _unitOfWork.Members.GetByEventId(eventId);
+        var members = await _unitOfWork.Members.GetByEventIdAsync(eventId);
         return _mapper.Map<List<MemberOfEventsResponseDto>>(members);  
     }
 }

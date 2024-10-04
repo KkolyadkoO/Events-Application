@@ -1,8 +1,8 @@
 using AutoMapper;
 using EventApp.Application.DTOs.CategoryOfEvent;
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Category;
 
@@ -19,14 +19,14 @@ public class AddCategoryUseCase
 
     public async Task<Guid> Execute(CategoryOfEventsRequestDto requestDto)
     {
-        var existingCategory = await _unitOfWork.Categories.GetByTitle(requestDto.Title);
+        var existingCategory = await _unitOfWork.Categories.GetByTitleAsync(requestDto.Title);
         if (existingCategory != null)
         {
             throw new DuplicateCategory($"Category with title '{requestDto.Title}' already exists."); 
         }
         var category = _mapper.Map<CategoryOfEvent>(requestDto);
         
-        var id = await _unitOfWork.Categories.Add(category);
+        var id = await _unitOfWork.Categories.AddAsync(category);
         
         await _unitOfWork.Complete();
         

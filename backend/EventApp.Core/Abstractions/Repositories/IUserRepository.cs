@@ -2,11 +2,8 @@ using EventApp.Core.Models;
 
 namespace EventApp.Core.Abstractions.Repositories;
 
-public interface IUserRepository
+public interface IUserRepository : IRepository<User>
 {
-    Task<List<User>> Get();
-    Task<User> GetByEmail(string email);
-    Task<User> GetByLogin(string login);
-    Task<Guid> Create(User user);
-    Task<User> GetById(Guid id);
+    Task<User> GetByEmailAsync(string email);
+    Task<User> GetByLoginAsync(string login);
 }

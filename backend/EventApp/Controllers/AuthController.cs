@@ -1,7 +1,7 @@
 using EventApp.Application.DTOs.User;
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.RefreshToken;
 using EventApp.Application.UseCases.User;
-using EventApp.Core.Exceptions;
 using EventApp.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 

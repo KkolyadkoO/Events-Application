@@ -1,9 +1,11 @@
 using AutoMapper;
 using EventApp.Application.DTOs.CategoryOfEvent;
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.Category;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -26,7 +28,7 @@ public class GetCategoryByIdUseCaseTests
     public async Task Execute_ShouldThrowNotFoundException_WhenCategoryDoesNotExist()
     {
         var categoryId = Guid.NewGuid();
-        _unitOfWorkMock.Setup(u => u.Categories.GetById(categoryId))
+        _unitOfWorkMock.Setup(u => u.Categories.GetByIdAsync(categoryId))
             .ReturnsAsync((CategoryOfEvent)null);
 
         await Assert.ThrowsAsync<NotFoundException>(() => _getCategoryByIdUseCase.Execute(categoryId));
@@ -39,7 +41,7 @@ public class GetCategoryByIdUseCaseTests
         var category = new CategoryOfEvent { Id = categoryId, Title = "Category 1" };
         var responseDto = new CategoryOfEventsResponseDto(categoryId, "Category 1");
 
-        _unitOfWorkMock.Setup(u => u.Categories.GetById(categoryId))
+        _unitOfWorkMock.Setup(u => u.Categories.GetByIdAsync(categoryId))
             .ReturnsAsync(category);
         _mapperMock.Setup(m => m.Map<CategoryOfEventsResponseDto>(category))
             .Returns(responseDto);

@@ -1,9 +1,11 @@
 using AutoMapper;
 using EventApp.Application.DTOs.CategoryOfEvent;
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.Category;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -26,7 +28,7 @@ public class AddCategoryUseCaseTests
     public async Task Execute_ShouldThrowDuplicateCategory_WhenCategoryExists()
     {
         var requestDto = new CategoryOfEventsRequestDto("Test Category");
-        _unitOfWorkMock.Setup(u => u.Categories.GetByTitle(It.IsAny<string>()))
+        _unitOfWorkMock.Setup(u => u.Categories.GetByTitleAsync(It.IsAny<string>()))
             .ReturnsAsync(new CategoryOfEvent());
 
         await Assert.ThrowsAsync<DuplicateCategory>(() => _addCategoryUseCase.Execute(requestDto));
@@ -39,10 +41,10 @@ public class AddCategoryUseCaseTests
         var category = new CategoryOfEvent { Title = requestDto.Title };
         var generatedId = Guid.NewGuid();
 
-        _unitOfWorkMock.Setup(u => u.Categories.GetByTitle(It.IsAny<string>()))
+        _unitOfWorkMock.Setup(u => u.Categories.GetByTitleAsync(It.IsAny<string>()))
             .ReturnsAsync((CategoryOfEvent)null);
         _mapperMock.Setup(m => m.Map<CategoryOfEvent>(requestDto)).Returns(category);
-        _unitOfWorkMock.Setup(u => u.Categories.Add(category)).ReturnsAsync(generatedId);
+        _unitOfWorkMock.Setup(u => u.Categories.AddAsync(category)).ReturnsAsync(generatedId);
 
         var result = await _addCategoryUseCase.Execute(requestDto);
 

@@ -15,6 +15,12 @@
 
     <ItemGroup>
       <ProjectReference Include="..\EventApp.Core\EventApp.Core.csproj" />
+      <ProjectReference Include="..\EventApp.DataAccess\EventApp.DataAccess.csproj" />
+      <ProjectReference Include="..\EventApp.Infrastructure\EventApp.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Abstructions\" />
     </ItemGroup>
 
 </Project>

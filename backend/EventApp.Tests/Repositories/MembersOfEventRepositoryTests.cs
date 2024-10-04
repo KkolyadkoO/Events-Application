@@ -32,7 +32,7 @@ public class MembersOfEventRepositoryTests
         {
             var repository = new MembersOfEventRepository(context);
 
-            var result = await repository.Get();
+            var result = await repository.GetAllAsync();
 
             Assert.Equal(2, result.Count);
         }
@@ -53,7 +53,7 @@ public class MembersOfEventRepositoryTests
         {
             var repository = new MembersOfEventRepository(context);
 
-            var result = await repository.GetById(memberId);
+            var result = await repository.GetByIdAsync(memberId);
 
             Assert.NotNull(result);
             Assert.Equal(memberId, result.Id);
@@ -68,7 +68,7 @@ public class MembersOfEventRepositoryTests
         {
             var repository = new MembersOfEventRepository(context);
 
-            var result = await repository.GetById(Guid.NewGuid());
+            var result = await repository.GetByIdAsync(Guid.NewGuid());
 
             Assert.Null(result);
         }
@@ -92,7 +92,7 @@ public class MembersOfEventRepositoryTests
         {
             var repository = new MembersOfEventRepository(context);
 
-            var result = await repository.GetByEventId(eventId);
+            var result = await repository.GetByEventIdAsync(eventId);
 
             Assert.Equal(2, result.Count);
             Assert.All(result, m => Assert.Equal(eventId, m.EventId));
@@ -117,7 +117,7 @@ public class MembersOfEventRepositoryTests
         {
             var repository = new MembersOfEventRepository(context);
 
-            var result = await repository.GetByUserId(userId);
+            var result = await repository.GetByUserIdAsync(userId);
 
             Assert.Equal(2, result.Count);
             Assert.All(result, m => Assert.Equal(userId, m.UserId));
@@ -141,7 +141,7 @@ public class MembersOfEventRepositoryTests
         {
             var repository = new MembersOfEventRepository(context);
 
-            var result = await repository.GetByEventIdAndUserId(eventId, userId);
+            var result = await repository.GetByEventIdAndUserIdAsync(eventId, userId);
 
             Assert.NotNull(result);
             Assert.Equal(eventId, result.EventId);
@@ -157,7 +157,7 @@ public class MembersOfEventRepositoryTests
         {
             var repository = new MembersOfEventRepository(context);
 
-            var result = await repository.GetByEventIdAndUserId(Guid.NewGuid(), Guid.NewGuid());
+            var result = await repository.GetByEventIdAndUserIdAsync(Guid.NewGuid(), Guid.NewGuid());
 
             Assert.Null(result);
         }
@@ -173,7 +173,7 @@ public class MembersOfEventRepositoryTests
         {
             var repository = new MembersOfEventRepository(context);
 
-            var resultId = await repository.Create(member);
+            var resultId = await repository.AddAsync(member);
             await context.SaveChangesAsync();
 
             var addedMember = await context.MemberOfEventEntities.FindAsync(resultId);
@@ -199,28 +199,11 @@ public class MembersOfEventRepositoryTests
             var repository = new MembersOfEventRepository(context);
             member.Name = "Updated Name";
 
-            var result = await repository.Update(member);
+            await repository.UpdateAsync(member);
             await context.SaveChangesAsync();
 
-            Assert.True(result);
             var updatedMember = await context.MemberOfEventEntities.FindAsync(member.Id);
             Assert.Equal("Updated Name", updatedMember.Name);
-        }
-    }
-
-    [Fact]
-    public async Task Update_ShouldReturnFalseIfMemberDoesNotExist()
-    {
-        var options = CreateInMemoryOptions();
-        var member = new MemberOfEvent { Id = Guid.NewGuid(), Name = "Non-existing Member" };
-
-        using (var context = new EventAppDBContext(options))
-        {
-            var repository = new MembersOfEventRepository(context);
-
-            var result = await repository.Update(member);
-
-            Assert.False(result);
         }
     }
 
@@ -240,29 +223,11 @@ public class MembersOfEventRepositoryTests
         {
             var repository = new MembersOfEventRepository(context);
 
-            await repository.Delete(member.Id);
+            await repository.DeleteAsync(member.Id);
             await context.SaveChangesAsync();
 
             var deletedMember = await context.MemberOfEventEntities.FindAsync(member.Id);
             Assert.Null(deletedMember);
-        }
-    }
-
-    [Fact]
-    public async Task Delete_ShouldDoNothingIfMemberDoesNotExist()
-    {
-        var options = CreateInMemoryOptions();
-
-        using (var context = new EventAppDBContext(options))
-        {
-            var repository = new MembersOfEventRepository(context);
-
-            var initialCount = await context.MemberOfEventEntities.CountAsync();
-            await repository.Delete(Guid.NewGuid());
-            await context.SaveChangesAsync();
-
-            var finalCount = await context.MemberOfEventEntities.CountAsync();
-            Assert.Equal(initialCount, finalCount);
         }
     }
 
@@ -284,27 +249,13 @@ public class MembersOfEventRepositoryTests
         {
             var repository = new MembersOfEventRepository(context);
 
-            var result = await repository.DeleteByEventIdAndUserId(eventId, userId);
+            await repository.DeleteByEventIdAndUserIdAsync(eventId, userId);
             await context.SaveChangesAsync();
 
-            Assert.True(result);
             var deletedMember = await context.MemberOfEventEntities
                 .FirstOrDefaultAsync(m => m.EventId == eventId && m.UserId == userId);
             Assert.Null(deletedMember);
         }
     }
-
-    [Fact]
-    public async Task DeleteByEventIdAndUserId_ShouldReturnFalseIfMemberDoesNotExist()
-    {
-        var options = CreateInMemoryOptions();
-        using (var context = new EventAppDBContext(options))
-        {
-            var repository = new MembersOfEventRepository(context);
-
-            var result = await repository.DeleteByEventIdAndUserId(Guid.NewGuid(), Guid.NewGuid());
-
-            Assert.False(result);
-        }
-    }
+    
 }

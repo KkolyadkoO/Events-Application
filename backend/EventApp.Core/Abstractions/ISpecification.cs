@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace EventApp.Core.Specifications;
+namespace EventApp.Core.Abstractions;
 
 public interface ISpecification<T>
 {

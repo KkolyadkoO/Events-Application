@@ -1,7 +1,9 @@
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.Member;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -19,33 +21,29 @@ public class DeleteMemberOfEventTests
     [Fact]
     public async Task DeleteMemberOfEvent_Should_Throw_NotFoundException_When_Member_Not_Found()
     {
-        // Arrange
         var memberId = Guid.NewGuid();
-        _unitOfWorkMock.Setup(u => u.Members.GetById(memberId)).ReturnsAsync((MemberOfEvent)null);
+        _unitOfWorkMock.Setup(u => u.Members.GetByIdAsync(memberId)).ReturnsAsync((MemberOfEvent)null);
 
         var useCase = new DeleteMemberOfEvent(_unitOfWorkMock.Object);
 
-        // Act & Assert
         await Assert.ThrowsAsync<NotFoundException>(() => useCase.Execute(memberId));
-        _unitOfWorkMock.Verify(u => u.Members.GetById(memberId), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Members.GetByIdAsync(memberId), Times.Once);
     }
 
     [Fact]
     public async Task DeleteMemberOfEvent_Should_Delete_When_Found()
     {
-        // Arrange
         var memberId = Guid.NewGuid();
-        var member = new MemberOfEvent(memberId, "John", "Doe", DateTime.Today, DateTime.Now, "john@example.com", Guid.NewGuid(), Guid.NewGuid());
-        _unitOfWorkMock.Setup(u => u.Members.GetById(memberId)).ReturnsAsync(member);
-        _unitOfWorkMock.Setup(u => u.Members.Delete(memberId)).Returns(Task.CompletedTask);
+        var member = new MemberOfEvent(memberId, "John", "Doe", DateTime.Today, DateTime.Now, "john@example.com",
+            Guid.NewGuid(), Guid.NewGuid());
+        _unitOfWorkMock.Setup(u => u.Members.GetByIdAsync(memberId)).ReturnsAsync(member);
+        _unitOfWorkMock.Setup(u => u.Members.DeleteAsync(memberId)).Returns(Task.CompletedTask);
 
         var useCase = new DeleteMemberOfEvent(_unitOfWorkMock.Object);
 
-        // Act
         await useCase.Execute(memberId);
-
-        // Assert
-        _unitOfWorkMock.Verify(u => u.Members.Delete(memberId), Times.Once);
+        
+        _unitOfWorkMock.Verify(u => u.Members.DeleteAsync(memberId), Times.Once);
         _unitOfWorkMock.Verify(u => u.Complete(), Times.Once);
     }
 }

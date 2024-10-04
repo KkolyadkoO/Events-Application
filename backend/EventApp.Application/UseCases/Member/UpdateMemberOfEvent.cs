@@ -1,7 +1,8 @@
 using AutoMapper;
 using EventApp.Application.DTOs.MemberOfEvent;
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Member;
 
@@ -18,13 +19,15 @@ public class UpdateMemberOfEvent
 
     public async Task Execute(Guid id, MemberOfEventsRequestDto requestDto)
     {
-        var memberOfEvent = await _unitOfWork.Members.GetById(id);
+        var memberOfEvent = await _unitOfWork.Members.GetByIdAsync(id);
         if (memberOfEvent == null)
         {
             throw new NotFoundException($"Member of Event with Id {id} not found");
         }
+        var updatedMemberOfEvent = _mapper.Map<MemberOfEvent>(requestDto);
+        updatedMemberOfEvent.Id = id;
 
-        await _unitOfWork.Members.Update(_mapper.Map(requestDto, memberOfEvent));
+        await _unitOfWork.Members.UpdateAsync(updatedMemberOfEvent);
         await _unitOfWork.Complete();
     }
 }

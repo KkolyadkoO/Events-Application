@@ -1,4 +1,4 @@
-namespace EventApp.Core.Exceptions;
+namespace EventApp.Application.Exceptions;
 
 public class DuplicateCategory : Exception
 {

@@ -1,7 +1,7 @@
 using AutoMapper;
 using EventApp.Application.DTOs.LocationOfEvent;
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Location;
 
@@ -18,7 +18,7 @@ public class GetLocationByIdUseCase
 
     public async Task<LocationOfEventsResponseDto> Execute(Guid id)
     {
-        var location = await _unitOfWork.Locations.GetById(id);
+        var location = await _unitOfWork.Locations.GetByIdAsync(id);
         if (location == null)
         {
             throw new NotFoundException($"Location with ID {id} not found.");

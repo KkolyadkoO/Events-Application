@@ -1,7 +1,7 @@
 using AutoMapper;
 using EventApp.Application.DTOs.MemberOfEvent;
-using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Member;
 
@@ -19,7 +19,7 @@ public class AddMemberOfEvent
     public async Task<Guid> Execute(MemberOfEventsRequestDto requestDto)
     {
         var memberOfEvent = _mapper.Map<MemberOfEvent>(requestDto); 
-        await _unitOfWork.Members.Create(memberOfEvent);
+        await _unitOfWork.Members.AddAsync(memberOfEvent);
         await _unitOfWork.Complete();
         return memberOfEvent.Id;
     }

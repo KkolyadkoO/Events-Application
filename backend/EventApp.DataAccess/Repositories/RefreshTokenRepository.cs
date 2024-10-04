@@ -1,62 +1,34 @@
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventApp.DataAccess.Repositories;
 
-public class RefreshTokenRepository : IRefreshTokenRepository
+public class RefreshTokenRepository : Repository<RefreshToken>, IRefreshTokenRepository
 {
-    private readonly EventAppDBContext _dbContext;
-
-    public RefreshTokenRepository(EventAppDBContext dbContext)
+    public RefreshTokenRepository(EventAppDBContext dbContext) : base(dbContext)
     {
-        _dbContext = dbContext;
     }
 
-
-    public async Task<Guid> Create(RefreshToken refreshToken)
+    public async Task<RefreshToken> GetByTokenAsync(string token)
     {
-        await _dbContext.RefreshTokenEntities.AddAsync(refreshToken);
-        return refreshToken.Id;
-    }
-
-    public async Task<RefreshToken> Get(string refreshToken)
-    {
-        var token = await _dbContext.RefreshTokenEntities
+        return await _dbContext.Set<RefreshToken>()
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Token == refreshToken);
-        return token;
+            .FirstOrDefaultAsync(x => x.Token == token);
     }
 
-    public async Task<RefreshToken> GetByUserId(Guid userId)
+    public async Task<RefreshToken> GetByUserIdAsync(Guid userId)
     {
-        var token = await _dbContext.RefreshTokenEntities
+        return await _dbContext.Set<RefreshToken>()
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.UserId == userId);
-
-        return token;
     }
 
-    public async Task Update(RefreshToken refreshToken)
+    public async Task DeleteByTokenAsync(string token)
     {
-        var foundedRefreshToken = await _dbContext.RefreshTokenEntities
-            .AsNoTracking()
-            .FirstOrDefaultAsync(rt => rt.Id == refreshToken.Id);
+        var refreshToken = await _dbContext.Set<RefreshToken>()
+            .FirstOrDefaultAsync(rt => rt.Token == token);
 
-        if (foundedRefreshToken != null)
-        {
-            _dbContext.RefreshTokenEntities.Update(refreshToken);
-        }
-    }
-
-    public async Task Delete(string refreshToken)
-    {
-        var foundedRefreshToken = await _dbContext.RefreshTokenEntities
-            .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
-        if (foundedRefreshToken != null)
-        {
-            _dbContext.RefreshTokenEntities.Remove(foundedRefreshToken);
-        }
+        _dbContext.Set<RefreshToken>().Remove(refreshToken);
     }
 }

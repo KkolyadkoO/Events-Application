@@ -1,5 +1,5 @@
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Location;
 
@@ -14,14 +14,14 @@ public class DeleteLocationUseCase
 
     public async Task Execute(Guid id)
     {
-        var location = await _unitOfWork.Locations.GetById(id);
+        var location = await _unitOfWork.Locations.GetByIdAsync(id);
 
         if (location == null)
         {
             throw new NotFoundException($"Location with ID '{id}' not found.");
         }
 
-        await _unitOfWork.Locations.Delete(id);
+        await _unitOfWork.Locations.DeleteAsync(id);
         await _unitOfWork.Complete();
     }
 }

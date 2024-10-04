@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using EventApp.Application.DTOs.Event;
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.Event;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -28,7 +30,7 @@ public class GetEventByIdUseCaseTests
         var existingEvent = new Core.Models.Event();
         var responseDto = new EventsResponseDto();
 
-        _unitOfWorkMock.Setup(u => u.Events.GetById(eventId)).ReturnsAsync(existingEvent);
+        _unitOfWorkMock.Setup(u => u.Events.GetByIdAsync(eventId)).ReturnsAsync(existingEvent);
         _mapperMock.Setup(m => m.Map<EventsResponseDto>(existingEvent)).Returns(responseDto);
 
         var result = await _useCase.Execute(eventId);
@@ -40,7 +42,7 @@ public class GetEventByIdUseCaseTests
     public async Task Execute_ShouldThrowNotFoundException_WhenEventDoesNotExist()
     {
         var eventId = Guid.NewGuid();
-        _unitOfWorkMock.Setup(u => u.Events.GetById(eventId)).ReturnsAsync((Core.Models.Event)null);
+        _unitOfWorkMock.Setup(u => u.Events.GetByIdAsync(eventId)).ReturnsAsync((Core.Models.Event)null);
 
         await Assert.ThrowsAsync<NotFoundException>(() => _useCase.Execute(eventId));
     }

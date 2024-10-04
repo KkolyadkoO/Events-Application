@@ -1,7 +1,7 @@
 using AutoMapper;
 using EventApp.Application.DTOs.User;
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.User;
 
@@ -18,7 +18,7 @@ public class GetUserByIdUseCase
 
     public async Task<UsersResponseDto> Execute(Guid id)
     {
-        var user = await _unitOfWork.Users.GetById(id);
+        var user = await _unitOfWork.Users.GetByIdAsync(id);
         if (user == null)
         {
             throw new UserNotFound($"User with ID {id} not found.");

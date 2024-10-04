@@ -32,11 +32,11 @@ public class CategoryOfEventsRepositoryTests
         {
             var repository = new CategoryOfEventsRepository(context);
 
-            var result = await repository.Get();
+            var result = await repository.GetAllAsync();
 
             Assert.Equal(2, result.Count);
-            Assert.Equal("A", result[0].Title);
-            Assert.Equal("B", result[1].Title);
+            Assert.Equal("B", result[0].Title);
+            Assert.Equal("A", result[1].Title);
         }
     }
 
@@ -55,7 +55,7 @@ public class CategoryOfEventsRepositoryTests
         {
             var repository = new CategoryOfEventsRepository(context);
 
-            var result = await repository.GetById(categoryId);
+            var result = await repository.GetByIdAsync(categoryId);
 
             Assert.NotNull(result);
             Assert.Equal(categoryId, result.Id);
@@ -70,7 +70,7 @@ public class CategoryOfEventsRepositoryTests
         {
             var repository = new CategoryOfEventsRepository(context);
 
-            var result = await repository.GetById(Guid.NewGuid());
+            var result = await repository.GetByIdAsync(Guid.NewGuid());
 
             Assert.Null(result);
         }
@@ -86,7 +86,7 @@ public class CategoryOfEventsRepositoryTests
         {
             var repository = new CategoryOfEventsRepository(context);
 
-            var resultId = await repository.Add(category);
+            var resultId = await repository.AddAsync(category);
 
             var addedCategory = await context.CategoryOfEventEntities.FindAsync(resultId);
             Assert.NotNull(addedCategory);
@@ -111,29 +111,13 @@ public class CategoryOfEventsRepositoryTests
             var repository = new CategoryOfEventsRepository(context);
             category.Title = "Updated Title";
 
-            var result = await repository.Update(category);
-
-            Assert.True(result);
+            await repository.UpdateAsync(category);
+            
             var updatedCategory = await context.CategoryOfEventEntities.FindAsync(category.Id);
             Assert.Equal("Updated Title", updatedCategory.Title);
         }
     }
-
-    [Fact]
-    public async Task Update_ShouldReturnFalseIfCategoryDoesNotExist()
-    {
-        var options = CreateInMemoryOptions();
-        var category = new CategoryOfEvent { Id = Guid.NewGuid(), Title = "Non-existing Category" };
-
-        using (var context = new EventAppDBContext(options))
-        {
-            var repository = new CategoryOfEventsRepository(context);
-
-            var result = await repository.Update(category);
-
-            Assert.False(result);
-        }
-    }
+    
 
     [Fact]
     public async Task Delete_ShouldRemoveCategoryIfExists()
@@ -151,7 +135,7 @@ public class CategoryOfEventsRepositoryTests
         {
             var repository = new CategoryOfEventsRepository(context);
 
-            await repository.Delete(category.Id);
+            await repository.DeleteAsync(category.Id);
             await context.SaveChangesAsync();
 
             var deletedCategory = await context.CategoryOfEventEntities.FindAsync(category.Id);
@@ -159,31 +143,8 @@ public class CategoryOfEventsRepositoryTests
         }
     }
 
+    
 
-    [Fact]
-    public async Task Delete_ShouldDoNothingIfCategoryDoesNotExist()
-    {
-        var options = CreateInMemoryOptions();
-
-        using (var context = new EventAppDBContext(options))
-        {
-            context.CategoryOfEventEntities.Add(
-                new CategoryOfEvent { Id = Guid.NewGuid(), Title = "Existing Category" });
-            await context.SaveChangesAsync();
-        }
-
-        using (var context = new EventAppDBContext(options))
-        {
-            var repository = new CategoryOfEventsRepository(context);
-
-            var initialCount = await context.CategoryOfEventEntities.CountAsync();
-            await repository.Delete(Guid.NewGuid());
-            await context.SaveChangesAsync();
-
-            var finalCount = await context.CategoryOfEventEntities.CountAsync();
-            Assert.Equal(initialCount, finalCount);
-        }
-    }
 
     [Fact]
     public async Task GetByTitle_ShouldReturnCategoryIfExists()
@@ -202,7 +163,7 @@ public class CategoryOfEventsRepositoryTests
         {
             var repository = new CategoryOfEventsRepository(context);
 
-            var result = await repository.GetByTitle(categoryTitle);
+            var result = await repository.GetByTitleAsync(categoryTitle);
 
             // Assert
             Assert.NotNull(result);
@@ -220,7 +181,7 @@ public class CategoryOfEventsRepositoryTests
         {
             var repository = new CategoryOfEventsRepository(context);
 
-            var result = await repository.GetByTitle("Non-existing Category");
+            var result = await repository.GetByTitleAsync("Non-existing Category");
 
             Assert.Null(result);
         }

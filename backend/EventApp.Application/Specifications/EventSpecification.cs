@@ -1,6 +1,6 @@
 using EventApp.Core.Models;
 
-namespace EventApp.Core.Specifications;
+namespace EventApp.Application.Specifications;
 
 public class EventSpecification : BaseSpecification<Event>
 {

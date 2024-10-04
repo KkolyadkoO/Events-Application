@@ -1,6 +1,8 @@
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.RefreshToken;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -20,7 +22,6 @@ public class GetRefreshTokenTests
     [Fact]
     public async Task Execute_ShouldReturnRefreshToken_WhenTokenExists()
     {
-        // Arrange
         var token = "valid-refresh-token";
         var refreshToken = new Core.Models.RefreshToken
         {
@@ -31,16 +32,14 @@ public class GetRefreshTokenTests
         };
 
         _unitOfWorkMock
-            .Setup(uow => uow.RefreshTokens.Get(token))
+            .Setup(uow => uow.RefreshTokens.GetByTokenAsync(token))
             .ReturnsAsync(refreshToken);
 
-        // Act
         var result = await _getRefreshToken.Execute(token);
 
-        // Assert
         Assert.NotNull(result);
         Assert.Equal(token, result.Token);
-        _unitOfWorkMock.Verify(uow => uow.RefreshTokens.Get(token), Times.Once);
+        _unitOfWorkMock.Verify(uow => uow.RefreshTokens.GetByTokenAsync(token), Times.Once);
     }
 
     [Fact]
@@ -49,12 +48,11 @@ public class GetRefreshTokenTests
         var token = "non-existent-token";
 
         _unitOfWorkMock
-            .Setup(uow => uow.RefreshTokens.Get(token))
+            .Setup(uow => uow.RefreshTokens.GetByTokenAsync(token))
             .ReturnsAsync((Core.Models.RefreshToken)null);
 
-        // Act & Assert
         var exception = await Assert.ThrowsAsync<NotFoundException>(() => _getRefreshToken.Execute(token));
         Assert.Equal($"Refresh token {token} not found", exception.Message);
-        _unitOfWorkMock.Verify(uow => uow.RefreshTokens.Get(token), Times.Once);
+        _unitOfWorkMock.Verify(uow => uow.RefreshTokens.GetByTokenAsync(token), Times.Once);
     }
 }

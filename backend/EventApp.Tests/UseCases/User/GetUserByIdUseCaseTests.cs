@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using EventApp.Application.DTOs.User;
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.User;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -25,7 +27,7 @@ public class GetUserByIdUseCaseTests
     public async Task Execute_ShouldThrowUserNotFoundException_WhenUserDoesNotExist()
     {
         var userId = Guid.NewGuid();
-        _unitOfWorkMock.Setup(u => u.Users.GetById(userId)).ReturnsAsync((Core.Models.User)null);
+        _unitOfWorkMock.Setup(u => u.Users.GetByIdAsync(userId)).ReturnsAsync((Core.Models.User)null);
 
         await Assert.ThrowsAsync<UserNotFound>(() => _getUserByIdUseCase.Execute(userId));
     }
@@ -35,7 +37,7 @@ public class GetUserByIdUseCaseTests
     {
         var userId = Guid.NewGuid();
         var user = new Core.Models.User(userId, "TestUser", "test@example.com", "password", "user");
-        _unitOfWorkMock.Setup(u => u.Users.GetById(userId)).ReturnsAsync(user);
+        _unitOfWorkMock.Setup(u => u.Users.GetByIdAsync(userId)).ReturnsAsync(user);
 
         var mappedUser = new UsersResponseDto(userId, "TestUser", "test@example.com", "user");
         _mapperMock.Setup(m => m.Map<UsersResponseDto>(user)).Returns(mappedUser);
@@ -43,7 +45,7 @@ public class GetUserByIdUseCaseTests
         var result = await _getUserByIdUseCase.Execute(userId);
 
         Assert.Equal(mappedUser.Id, result.Id);
-        _unitOfWorkMock.Verify(u => u.Users.GetById(userId), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Users.GetByIdAsync(userId), Times.Once);
         _mapperMock.Verify(m => m.Map<UsersResponseDto>(user), Times.Once);
     }
 }

@@ -1,7 +1,7 @@
 using AutoMapper;
 using EventApp.Application.DTOs.User;
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.DataAccess.Abstractions;
 using EventApp.Infrastructure;
 
 namespace EventApp.Application.UseCases.User;
@@ -21,7 +21,7 @@ public class LoginUserUseCase
 
     public async Task<UsersResponseDto> Execute(UserLoginRequestDto request)
     {
-        var user = await _unitOfWork.Users.GetByLogin(request.UserName);
+        var user = await _unitOfWork.Users.GetByLoginAsync(request.UserName);
         if (user == null || !_passwordHasher.VerifyHashedPassword(user.Password, request.Password))
         {
             throw new InvalidLoginException("Invalid username or password");

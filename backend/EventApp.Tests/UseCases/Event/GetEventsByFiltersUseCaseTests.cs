@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using EventApp.Application.DTOs.Event;
+using EventApp.Application.Specifications;
 using EventApp.Application.UseCases.Event;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -27,7 +30,7 @@ public class GetEventsByFiltersUseCaseTests
         var events = new List<Core.Models.Event>();
         var responseDtos = new List<EventsResponseDto>();
 
-        _unitOfWorkMock.Setup(u => u.Events.GetBySpecificationAsync(It.IsAny<Core.Specifications.EventSpecification>(), It.IsAny<int?>(), It.IsAny<int?>()))
+        _unitOfWorkMock.Setup(u => u.Events.GetBySpecificationAsync(It.IsAny<EventSpecification>(), It.IsAny<int?>(), It.IsAny<int?>()))
             .ReturnsAsync((events, 10));
         _mapperMock.Setup(m => m.Map<List<EventsResponseDto>>(events)).Returns(responseDtos);
 
@@ -43,7 +46,7 @@ public class GetEventsByFiltersUseCaseTests
         var emptyEventList = new List<Core.Models.Event>();
         var emptyResponseDtos = new List<EventsResponseDto>();
 
-        _unitOfWorkMock.Setup(u => u.Events.GetBySpecificationAsync(It.IsAny<Core.Specifications.EventSpecification>(), It.IsAny<int?>(), It.IsAny<int?>()))
+        _unitOfWorkMock.Setup(u => u.Events.GetBySpecificationAsync(It.IsAny<EventSpecification>(), It.IsAny<int?>(), It.IsAny<int?>()))
             .ReturnsAsync((emptyEventList, 0));
         _mapperMock.Setup(m => m.Map<List<EventsResponseDto>>(emptyEventList)).Returns(emptyResponseDtos);
 

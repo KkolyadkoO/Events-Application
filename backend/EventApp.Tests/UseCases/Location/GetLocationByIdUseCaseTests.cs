@@ -1,9 +1,11 @@
 using AutoMapper;
 using EventApp.Application.DTOs.LocationOfEvent;
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.Location;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -29,7 +31,7 @@ public class GetLocationByIdUseCaseTests
         var locationEntity = new LocationOfEvent(locationId, "Test Location");
         var locationResponse = new LocationOfEventsResponseDto(locationId, "Test Location");
 
-        _mockUnitOfWork.Setup(u => u.Locations.GetById(locationId)).ReturnsAsync(locationEntity);
+        _mockUnitOfWork.Setup(u => u.Locations.GetByIdAsync(locationId)).ReturnsAsync(locationEntity);
         _mockMapper.Setup(m => m.Map<LocationOfEventsResponseDto>(locationEntity)).Returns(locationResponse);
 
 
@@ -44,7 +46,7 @@ public class GetLocationByIdUseCaseTests
     {
         var locationId = Guid.NewGuid();
 
-        _mockUnitOfWork.Setup(u => u.Locations.GetById(locationId)).ReturnsAsync((LocationOfEvent)null);
+        _mockUnitOfWork.Setup(u => u.Locations.GetByIdAsync(locationId)).ReturnsAsync((LocationOfEvent)null);
 
 
         await Assert.ThrowsAsync<NotFoundException>(() => _getLocationByIdUseCase.Execute(locationId));

@@ -1,5 +1,7 @@
 using AutoMapper;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
+using EventApp.DataAccess.Abstractions;
 using EventApp.DataAccess.Repositories;
 
 namespace EventApp.DataAccess;

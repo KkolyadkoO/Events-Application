@@ -1,8 +1,10 @@
 using AutoMapper;
 using EventApp.Application.DTOs.MemberOfEvent;
 using EventApp.Application.UseCases.Member;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -31,13 +33,13 @@ public class AddMemberOfEventTests
             Guid.NewGuid(), Guid.NewGuid());
 
         _mapperMock.Setup(m => m.Map<MemberOfEvent>(requestDto)).Returns(memberOfEvent);
-        _unitOfWorkMock.Setup(u => u.Members.Create(It.IsAny<MemberOfEvent>())).ReturnsAsync(memberId);
+        _unitOfWorkMock.Setup(u => u.Members.AddAsync(It.IsAny<MemberOfEvent>())).ReturnsAsync(memberId);
 
 
         var result = await _addMemberOfEvent.Execute(requestDto);
 
         Assert.Equal(memberId, result);
-        _unitOfWorkMock.Verify(u => u.Members.Create(memberOfEvent), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Members.AddAsync(memberOfEvent), Times.Once);
         _unitOfWorkMock.Verify(u => u.Complete(), Times.Once);
     }
 }

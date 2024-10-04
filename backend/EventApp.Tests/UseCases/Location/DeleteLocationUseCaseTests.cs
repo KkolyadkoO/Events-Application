@@ -1,7 +1,9 @@
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.Location;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -24,12 +26,12 @@ public class DeleteLocationUseCaseTests
         var locationId = Guid.NewGuid();
         var locationEntity = new LocationOfEvent(locationId, "Test Location");
 
-        _mockUnitOfWork.Setup(u => u.Locations.GetById(locationId)).ReturnsAsync(locationEntity);
+        _mockUnitOfWork.Setup(u => u.Locations.GetByIdAsync(locationId)).ReturnsAsync(locationEntity);
 
 
         await _deleteLocationUseCase.Execute(locationId);
 
-        _mockUnitOfWork.Verify(u => u.Locations.Delete(locationId), Times.Once);
+        _mockUnitOfWork.Verify(u => u.Locations.DeleteAsync(locationId), Times.Once);
         _mockUnitOfWork.Verify(u => u.Complete(), Times.Once);
     }
 
@@ -38,7 +40,7 @@ public class DeleteLocationUseCaseTests
     {
         var locationId = Guid.NewGuid();
 
-        _mockUnitOfWork.Setup(u => u.Locations.GetById(locationId)).ReturnsAsync((LocationOfEvent)null);
+        _mockUnitOfWork.Setup(u => u.Locations.GetByIdAsync(locationId)).ReturnsAsync((LocationOfEvent)null);
 
 
         await Assert.ThrowsAsync<NotFoundException>(() => _deleteLocationUseCase.Execute(locationId));

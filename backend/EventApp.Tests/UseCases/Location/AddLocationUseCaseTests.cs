@@ -1,9 +1,11 @@
 using AutoMapper;
 using EventApp.Application.DTOs.LocationOfEvent;
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.Location;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -28,9 +30,9 @@ public class AddLocationUseCaseTests
         var locationRequest = new LocationOfEventsRequestDto("Test Location");
         var locationEntity = new LocationOfEvent(Guid.NewGuid(), "Test Location");
 
-        _mockUnitOfWork.Setup(u => u.Locations.GetByTitle(It.IsAny<string>())).ReturnsAsync((LocationOfEvent)null);
+        _mockUnitOfWork.Setup(u => u.Locations.GetByTitleAsync(It.IsAny<string>())).ReturnsAsync((LocationOfEvent)null);
         _mockMapper.Setup(m => m.Map<LocationOfEvent>(locationRequest)).Returns(locationEntity);
-        _mockUnitOfWork.Setup(u => u.Locations.Add(It.IsAny<LocationOfEvent>())).ReturnsAsync(locationEntity.Id);
+        _mockUnitOfWork.Setup(u => u.Locations.AddAsync(It.IsAny<LocationOfEvent>())).ReturnsAsync(locationEntity.Id);
 
 
         var result = await _addLocationUseCase.Execute(locationRequest);
@@ -45,7 +47,7 @@ public class AddLocationUseCaseTests
         var locationRequest = new LocationOfEventsRequestDto("Existing Location");
         var existingLocation = new LocationOfEvent(Guid.NewGuid(), "Existing Location");
 
-        _mockUnitOfWork.Setup(u => u.Locations.GetByTitle(It.IsAny<string>())).ReturnsAsync(existingLocation);
+        _mockUnitOfWork.Setup(u => u.Locations.GetByTitleAsync(It.IsAny<string>())).ReturnsAsync(existingLocation);
 
 
         await Assert.ThrowsAsync<DuplicateCategory>(() => _addLocationUseCase.Execute(locationRequest));

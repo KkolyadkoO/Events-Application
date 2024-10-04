@@ -1,7 +1,7 @@
 using AutoMapper;
 using EventApp.Application.DTOs.MemberOfEvent;
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Member;
 
@@ -18,7 +18,7 @@ public class GetMemberOfEventById
 
     public async Task<MemberOfEventsResponseDto> Execute(Guid id)
     {
-        var memberOfEvent = await _unitOfWork.Members.GetById(id);
+        var memberOfEvent = await _unitOfWork.Members.GetByIdAsync(id);
         if (memberOfEvent == null)
         {
             throw new NotFoundException($"Member of Event with Id {id} not found");

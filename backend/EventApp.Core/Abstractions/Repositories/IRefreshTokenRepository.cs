@@ -2,11 +2,9 @@ using EventApp.Core.Models;
 
 namespace EventApp.Core.Abstractions.Repositories;
 
-public interface IRefreshTokenRepository
+public interface IRefreshTokenRepository : IRepository<RefreshToken>
 {
-    Task<Guid> Create(RefreshToken refreshToken);
-    Task<RefreshToken> Get(string refreshToken);
-    Task<RefreshToken> GetByUserId(Guid userId);
-    Task Update(RefreshToken refreshToken);
-    Task Delete(string refreshToken);
+    Task<RefreshToken> GetByTokenAsync(string refreshToken);
+    Task<RefreshToken> GetByUserIdAsync(Guid userId);
+    Task DeleteByTokenAsync(string refreshToken);
 }

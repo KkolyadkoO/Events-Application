@@ -1,7 +1,7 @@
 using AutoMapper;
 using EventApp.Application.DTOs.Event;
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Specifications;
+using EventApp.Application.Specifications;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Event;
 

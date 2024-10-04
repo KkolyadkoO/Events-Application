@@ -1,7 +1,9 @@
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.Category;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -22,7 +24,7 @@ public class DeleteCategoryUseCaseTests
     public async Task Execute_ShouldThrowNotFoundException_WhenCategoryDoesNotExist()
     {
         var categoryId = Guid.NewGuid();
-        _unitOfWorkMock.Setup(u => u.Categories.GetById(categoryId))
+        _unitOfWorkMock.Setup(u => u.Categories.GetByIdAsync(categoryId))
             .ReturnsAsync((CategoryOfEvent)null);
 
         await Assert.ThrowsAsync<NotFoundException>(() => _deleteCategoryUseCase.Execute(categoryId));
@@ -34,14 +36,14 @@ public class DeleteCategoryUseCaseTests
         var categoryId = Guid.NewGuid();
         var category = new CategoryOfEvent { Id = categoryId };
 
-        _unitOfWorkMock.Setup(u => u.Categories.GetById(categoryId))
+        _unitOfWorkMock.Setup(u => u.Categories.GetByIdAsync(categoryId))
             .ReturnsAsync(category);
-        _unitOfWorkMock.Setup(u => u.Categories.Delete(categoryId))
+        _unitOfWorkMock.Setup(u => u.Categories.DeleteAsync(categoryId))
             .Returns(Task.CompletedTask);
 
         await _deleteCategoryUseCase.Execute(categoryId);
 
-        _unitOfWorkMock.Verify(u => u.Categories.Delete(categoryId), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Categories.DeleteAsync(categoryId), Times.Once);
         _unitOfWorkMock.Verify(u => u.Complete(), Times.Once);
     }
 }

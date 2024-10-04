@@ -1,5 +1,4 @@
 using System.Text;
-using EventApp.Application;
 using EventApp.Application.Mapping;
 using EventApp.Application.UseCases.Category;
 using EventApp.Application.UseCases.Event;
@@ -7,8 +6,9 @@ using EventApp.Application.UseCases.Location;
 using EventApp.Application.UseCases.Member;
 using EventApp.Application.UseCases.RefreshToken;
 using EventApp.Application.UseCases.User;
-using EventApp.Core.Abstractions.Repositories;
+using EventApp.Core.Abstractions;
 using EventApp.DataAccess;
+using EventApp.DataAccess.Abstractions;
 using EventApp.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
@@ -55,14 +55,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddAutoMapper(typeof(MappingCategory));
+builder.Services.AddAutoMapper(typeof(MappingUser));
+builder.Services.AddAutoMapper(typeof(MappingEvent));
+builder.Services.AddAutoMapper(typeof(MappingMemberOfEvent));
+builder.Services.AddAutoMapper(typeof(MappingLocation));
+
 builder.Services.AddDbContext<EventAppDBContext>(
     options => { options.UseNpgsql(configuration.GetConnectionString(nameof(EventAppDBContext))); });
 
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-// builder.Services.AddScoped<IEventsService, EventsService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
 builder.Services.AddScoped<AddCategoryUseCase>();
 builder.Services.AddScoped<DeleteCategoryUseCase>();

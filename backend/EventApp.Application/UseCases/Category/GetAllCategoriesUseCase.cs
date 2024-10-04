@@ -1,6 +1,6 @@
 using AutoMapper;
 using EventApp.Application.DTOs.CategoryOfEvent;
-using EventApp.Core.Abstractions.Repositories;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Category;
 
@@ -17,7 +17,7 @@ public class GetAllCategoriesUseCase
 
     public async Task<List<CategoryOfEventsResponseDto>> Execute()
     {
-        var categories = await _unitOfWork.Categories.Get();
+        var categories = await _unitOfWork.Categories.GetAllAsync();
             
         return _mapper.Map<List<CategoryOfEventsResponseDto>>(categories);
     }

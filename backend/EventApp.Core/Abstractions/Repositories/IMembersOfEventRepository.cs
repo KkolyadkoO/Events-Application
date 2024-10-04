@@ -2,17 +2,10 @@ using EventApp.Core.Models;
 
 namespace EventApp.Core.Abstractions.Repositories;
 
-public interface IMembersOfEventRepository
+public interface IMembersOfEventRepository : IRepository<MemberOfEvent>
 {
-    Task<List<MemberOfEvent>> Get();
-    Task<MemberOfEvent> GetById(Guid id);
-    Task<List<MemberOfEvent>> GetByEventId(Guid eventId);
-    Task<List<MemberOfEvent>> GetByUserId(Guid userId);
-    Task<Guid> Create(MemberOfEvent memberOfEvent);
-    
-    Task<bool> Update(MemberOfEvent memberOfEvent);
-
-    Task Delete(Guid id);
-    Task<bool> DeleteByEventIdAndUserId(Guid eventId, Guid userId);
-    Task<MemberOfEvent> GetByEventIdAndUserId(Guid eventId, Guid userId);
+    Task<List<MemberOfEvent>> GetByEventIdAsync(Guid eventId);
+    Task<List<MemberOfEvent>> GetByUserIdAsync(Guid userId);
+    Task DeleteByEventIdAndUserIdAsync(Guid eventId, Guid userId);
+    Task<MemberOfEvent> GetByEventIdAndUserIdAsync(Guid eventId, Guid userId);
 }

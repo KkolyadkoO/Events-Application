@@ -1,6 +1,6 @@
 using EventApp.Application.DTOs.CategoryOfEvent;
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.Category;
-using EventApp.Core.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

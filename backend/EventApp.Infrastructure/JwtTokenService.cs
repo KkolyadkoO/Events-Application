@@ -2,10 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using EventApp.Core.Abstractions;
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -44,12 +42,12 @@ public class JwtTokenService : IJwtTokenService
         );
         var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-        var refreshToken = await _unitOfWork.RefreshTokens.GetByUserId(userId);
+        var refreshToken = await _unitOfWork.RefreshTokens.GetByUserIdAsync(userId);
         if (refreshToken == null)
         {
             var newRefreshToken = new RefreshToken(Guid.NewGuid(), userId, GenerateRefreshToken(),
                 DateTime.Now.ToUniversalTime().AddDays(double.Parse(jwtSettings["RefreshTokenExpiresDay"])));
-            await _unitOfWork.RefreshTokens.Create(newRefreshToken);
+            await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken);
             await _unitOfWork.Complete();
             return (accessToken, newRefreshToken.Token);
         }
@@ -59,7 +57,7 @@ public class JwtTokenService : IJwtTokenService
             var newRefreshToken = refreshToken;
             newRefreshToken.Token = GenerateRefreshToken();
             newRefreshToken.Expires = DateTime.Now.ToUniversalTime().AddDays(double.Parse(jwtSettings["RefreshTokenExpiresDay"]));
-            await _unitOfWork.RefreshTokens.Update(newRefreshToken);
+            await _unitOfWork.RefreshTokens.UpdateAsync(newRefreshToken);
             await _unitOfWork.Complete();
             return (accessToken, newRefreshToken.Token);
         }

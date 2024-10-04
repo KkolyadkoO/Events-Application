@@ -1,6 +1,6 @@
 using AutoMapper;
 using EventApp.Application.DTOs.User;
-using EventApp.Core.Abstractions.Repositories;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.User;
 
@@ -17,7 +17,7 @@ public class GetAllUsersUseCase
 
     public async Task<List<UsersResponseDto>> Execute()
     {
-        var users = await _unitOfWork.Users.Get();
+        var users = await _unitOfWork.Users.GetAllAsync();
         return _mapper.Map<List<UsersResponseDto>>(users);
     }
 }

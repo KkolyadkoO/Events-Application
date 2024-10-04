@@ -1,7 +1,7 @@
 using AutoMapper;
 using EventApp.Application.DTOs.CategoryOfEvent;
-using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
+using EventApp.Application.Exceptions;
+using EventApp.DataAccess.Abstractions;
 
 namespace EventApp.Application.UseCases.Category;
 
@@ -18,7 +18,7 @@ public class GetCategoryByIdUseCase
 
     public async Task<CategoryOfEventsResponseDto> Execute(Guid id)
     {
-        var category = await _unitOfWork.Categories.GetById(id);
+        var category = await _unitOfWork.Categories.GetByIdAsync(id);
         if (category == null)
         {
             throw new NotFoundException($"Category with ID {id} not found.");

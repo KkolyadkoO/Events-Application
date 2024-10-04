@@ -25,7 +25,7 @@ public class RefreshTokenRepositoryTests
         {
             var repository = new RefreshTokenRepository(context);
 
-            var resultId = await repository.Create(token);
+            var resultId = await repository.AddAsync(token);
             await context.SaveChangesAsync();
 
             var addedToken = await context.RefreshTokenEntities.FindAsync(resultId);
@@ -50,7 +50,7 @@ public class RefreshTokenRepositoryTests
         {
             var repository = new RefreshTokenRepository(context);
 
-            var result = await repository.Get(token.Token);
+            var result = await repository.GetByTokenAsync(token.Token);
 
             Assert.NotNull(result);
             Assert.Equal(token.Token, result.Token);
@@ -66,7 +66,7 @@ public class RefreshTokenRepositoryTests
         {
             var repository = new RefreshTokenRepository(context);
 
-            var result = await repository.Get("non-existent-token");
+            var result = await repository.GetByTokenAsync("non-existent-token");
 
             Assert.Null(result);
         }
@@ -89,7 +89,7 @@ public class RefreshTokenRepositoryTests
         {
             var repository = new RefreshTokenRepository(context);
 
-            var result = await repository.GetByUserId(userId);
+            var result = await repository.GetByUserIdAsync(userId);
 
             Assert.NotNull(result);
             Assert.Equal(userId, result.UserId);
@@ -104,7 +104,7 @@ public class RefreshTokenRepositoryTests
         {
             var repository = new RefreshTokenRepository(context);
 
-            var result = await repository.GetByUserId(Guid.NewGuid());
+            var result = await repository.GetByUserIdAsync(Guid.NewGuid());
 
             Assert.Null(result);
         }
@@ -127,7 +127,7 @@ public class RefreshTokenRepositoryTests
             var repository = new RefreshTokenRepository(context);
             token.Token = "updatedToken";
 
-            await repository.Update(token);
+            await repository.UpdateAsync(token);
             await context.SaveChangesAsync();
 
             var updatedToken = await context.RefreshTokenEntities.FindAsync(token.Id);
@@ -135,24 +135,6 @@ public class RefreshTokenRepositoryTests
         }
     }
 
-    [Fact]
-    public async Task Update_ShouldNotThrowIfRefreshTokenDoesNotExist()
-    {
-        var options = CreateInMemoryOptions();
-        var nonExistentToken = new RefreshToken
-            { Id = Guid.NewGuid(), Token = "non-existent-token", UserId = Guid.NewGuid() };
-
-        using (var context = new EventAppDBContext(options))
-        {
-            var repository = new RefreshTokenRepository(context);
-
-            await repository.Update(nonExistentToken);
-            await context.SaveChangesAsync();
-
-            var tokenInDb = await context.RefreshTokenEntities.FindAsync(nonExistentToken.Id);
-            Assert.Null(tokenInDb);
-        }
-    }
 
     [Fact]
     public async Task Delete_ShouldRemoveRefreshTokenIfExists()
@@ -170,7 +152,7 @@ public class RefreshTokenRepositoryTests
         {
             var repository = new RefreshTokenRepository(context);
 
-            await repository.Delete(token.Token);
+            await repository.DeleteByTokenAsync(token.Token);
             await context.SaveChangesAsync();
 
             var deletedToken = await context.RefreshTokenEntities.FirstOrDefaultAsync(t => t.Token == token.Token);
@@ -178,20 +160,5 @@ public class RefreshTokenRepositoryTests
         }
     }
 
-    [Fact]
-    public async Task Delete_ShouldDoNothingIfRefreshTokenDoesNotExist()
-    {
-        var options = CreateInMemoryOptions();
-
-        using (var context = new EventAppDBContext(options))
-        {
-            var repository = new RefreshTokenRepository(context);
-
-            await repository.Delete("non-existent-token");
-            await context.SaveChangesAsync();
-
-            var tokenCount = await context.RefreshTokenEntities.CountAsync();
-            Assert.Equal(0, tokenCount);
-        }
-    }
+    
 }

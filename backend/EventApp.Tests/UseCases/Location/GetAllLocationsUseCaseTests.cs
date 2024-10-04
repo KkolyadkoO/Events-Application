@@ -1,8 +1,10 @@
 using AutoMapper;
 using EventApp.Application.DTOs.LocationOfEvent;
 using EventApp.Application.UseCases.Location;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -35,7 +37,7 @@ public class GetAllLocationsUseCaseTests
             new LocationOfEventsResponseDto(Guid.NewGuid(), "Location 2")
         };
 
-        _mockUnitOfWork.Setup(u => u.Locations.Get()).ReturnsAsync(locationEntities);
+        _mockUnitOfWork.Setup(u => u.Locations.GetAllAsync()).ReturnsAsync(locationEntities);
         _mockMapper.Setup(m => m.Map<List<LocationOfEventsResponseDto>>(locationEntities)).Returns(locationResponseDtos);
 
 

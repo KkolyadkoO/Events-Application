@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
+using EventApp.Core.Abstractions;
 
-namespace EventApp.Core.Specifications;
+namespace EventApp.Application.Specifications;
 
 public class BaseSpecification<T> : ISpecification<T>
 {

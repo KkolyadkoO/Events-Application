@@ -1,6 +1,7 @@
 using AutoMapper;
 using EventApp.Application.DTOs.Event;
-using EventApp.Core.Abstractions.Repositories;
+using EventApp.DataAccess.Abstractions;
+using EventApp.Infrastructure;
 using Microsoft.AspNetCore.Http;
 
 namespace EventApp.Application.UseCases.Event
@@ -9,11 +10,13 @@ namespace EventApp.Application.UseCases.Event
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IImageService _imageService;
 
-        public CreateEventUseCase(IUnitOfWork unitOfWork, IMapper mapper)
+        public CreateEventUseCase(IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _imageService = imageService;
         }
 
         public async Task<Guid> Execute(EventsRequestDto receivedEvent, IFormFile imageFile)
@@ -22,28 +25,6 @@ namespace EventApp.Application.UseCases.Event
 
             if (imageFile != null)
             {
-                try
-                {
-                    newEvent.ImageUrl = await SaveImageToFileSystem(imageFile);
-                }
-                catch (InvalidOperationException e)
-                {
-                    throw new ApplicationException("Image file could not be saved.", e);
-                }
-                
-            }
-
-            var id = await _unitOfWork.Events.Create(newEvent);
-            await _unitOfWork.Complete();
-            return id;
-        }
-
-        private async Task<string> SaveImageToFileSystem(IFormFile imageFile)
-        {
-            string imagePath = "";
-        
-            if (imageFile != null && imageFile.Length > 0){
-
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                 var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
 
@@ -55,26 +36,12 @@ namespace EventApp.Application.UseCases.Event
                     throw new InvalidOperationException("The uploaded file is not a valid image.");
                 }
 
-                var imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-            
-                if (!Directory.Exists(imageFolder))
-                {
-                    Directory.CreateDirectory(imageFolder);
-                }
-            
-                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            
-                var filePath = Path.Combine(imageFolder, uniqueFileName);
-            
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await imageFile.CopyToAsync(stream);
-                }
-            
-                return $"/images/{uniqueFileName}";
+                newEvent.ImageUrl = await _imageService.SaveImageToFileSystem(imageFile);
             }
 
-            return "";
+            var id = await _unitOfWork.Events.AddAsync(newEvent);
+            await _unitOfWork.Complete();
+            return id;
         }
     }
 }

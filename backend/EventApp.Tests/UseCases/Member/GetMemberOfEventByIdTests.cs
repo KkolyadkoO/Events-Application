@@ -1,9 +1,11 @@
 using AutoMapper;
 using EventApp.Application.DTOs.MemberOfEvent;
+using EventApp.Application.Exceptions;
 using EventApp.Application.UseCases.Member;
+using EventApp.Core.Abstractions;
 using EventApp.Core.Abstractions.Repositories;
-using EventApp.Core.Exceptions;
 using EventApp.Core.Models;
+using EventApp.DataAccess.Abstractions;
 using Moq;
 using Xunit;
 
@@ -26,7 +28,7 @@ public class GetMemberOfEventByIdTests
     public async Task Execute_ShouldThrowNotFoundException_WhenMemberNotFound()
     {
         var memberId = Guid.NewGuid();
-        _unitOfWorkMock.Setup(u => u.Members.GetById(memberId)).ReturnsAsync((MemberOfEvent)null);
+        _unitOfWorkMock.Setup(u => u.Members.GetByIdAsync(memberId)).ReturnsAsync((MemberOfEvent)null);
 
         await Assert.ThrowsAsync<NotFoundException>(() => _getMemberOfEventByIdUseCase.Execute(memberId));
     }
@@ -38,7 +40,7 @@ public class GetMemberOfEventByIdTests
         var member = new MemberOfEvent();
         var responseDto = new MemberOfEventsResponseDto(memberId, "John", "Doe", DateTime.Now, "john@example.com", Guid.NewGuid(), Guid.NewGuid());
 
-        _unitOfWorkMock.Setup(u => u.Members.GetById(memberId)).ReturnsAsync(member);
+        _unitOfWorkMock.Setup(u => u.Members.GetByIdAsync(memberId)).ReturnsAsync(member);
         _mapperMock.Setup(m => m.Map<MemberOfEventsResponseDto>(member)).Returns(responseDto);
 
         var result = await _getMemberOfEventByIdUseCase.Execute(memberId);
